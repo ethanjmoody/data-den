@@ -4,10 +4,10 @@ Welcome to my data science portfolio! :wave:
 
 This repository showcases a diverse range of projects spanning different domains and personal areas of interest. Some of these projects were individual undertakings; others were the result of group efforts. Here, you'll find examples of:
 
-- :robot: **Machine Learning & Modeling**: Projects demonstrating predictive modeling, evaluation, and algorithm development.
+- :robot: **Machine Learning & Modeling**: Projects demonstrating predictive modeling and algorithm development.
 - :test_tube: **Causal Inference**: Insights drawn from designing and interpreting experiments to infer causality.
-- :bar_chart: **Applied Statistics**: Relevant applications of statistical methods to explore data and drive decisions.
-- :speech_balloon: **Natural Language Processing (NLP) and GenAI**: Explorations of language models, information retrieval, and response generation.
+- :bar_chart: **Applied Statistics**: Applications of statistical methods to explore data and drive decisions.
+- :speech_balloon: **NLP and GenAI**: Explorations of language models, info retrieval, and response generation.
 - :writing_hand: **Scientific & Technical Writing**: Papers written to explain project findings and their practical significance.
 
 Each project includes comprehensive code, notes on key findings, and visualizations to demonstrate my approach and results. Feel free to explore and reach out with any questions or collaboration opportunities.
