@@ -36,8 +36,8 @@ Project materials reside in `individual folders`, labeled by project name. Below
 
 :credit_card: **Predicting Credit Card Customer Attrition using the "Churn-Discern" Model**
 - Developed a machine learning model to classify retained vs. lost credit card customers based on ten features.
-- Compared a variety of modeling approaches: GLMs, SVMs, naïve Bayes, KNN, random forest, GBMs, neural nets.
-- Used insights from EDA and hyperparameter tuning to achieve 96% accuracy and 92% recall on hold-out (test) data.
+- Tested a range of modeling approaches: GLMs, SVMs, naïve Bayes, KNN, random forest, GBMs, neural nets.
+- Applied insights from EDA and HP tuning to achieve 96% accuracy and 92% recall on hold-out (test) set.
 - Highlighted skills and tools: Python, Scikit-learn/TensorFlow (data preprocessing and modeling), Shapley (model interpretation and feature importance), class imbalance handling (SMOTE/class reweighting).
 
 :moneybag: **Estimating Key Drivers of Peer-to-Peer Loan Interest Rates**
@@ -47,8 +47,8 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Highlighted skills and tools: R (analysis/modeling), statistical goodness of fit testing, linear regressions, R Markdown (paper writing).
 
 :page_with_curl: **Unmasking the Limitations of a Recent COVID-19 Study and Evaluating Causal Claims**
-- Responded to a study on COVID-19 school masking policy, evaluating the assumptions behind the study's claims.
-- Summarized study's design and major conclusions and offered an argument against causality based on the design.
+- Responded to a study on COVID-19 school masking, evaluating the assumptions behind the study's claims.
+- Summarized study's conclusions and offered an argument against causality based on the chosen design.
 - Posited characteristics of an "ideal", alternative experiment that could better support the study's claims.
 - Highlighted skills and tools: Logic and reasoning, critical thinking, understanding of experimental design, R Markdown (paper writing).
 
