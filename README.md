@@ -19,12 +19,12 @@ Project materials reside in `individual folders`, labeled by project name. Below
 :mag: **From RAGs to Riches: How Search and Q&A Capabilities with RAG can Accelerate E&M Workflows**
 - Implemented a Retrieval-Augmented Generation (RAG) system to generate answers to NLP/GenAI questions.
 - Evaluated the impacts of embedding models, LLMs, document chunking, and prompting on RAG performance.
-- Analyzed generated answers against ground-truths, scoring >0.90 on faithfulness and answer relevancy metrics.
+- Analyzed generated answers against ground-truths, scoring >0.90 on faithfulness and answer relevancy.
 - Highlighted skills and tools: Python, LangChain, Qdrant vector stores, Hugging Face and pre-trained LLMs, prompt engineering, RAGAS and other RAG evaluation metrics (e.g., BERTScore), R Markdown (paper writing).
 
 :open_book: **Beyond Words: Exploring the Effects of Font Size & Pacing on Reading Enjoyment and Fact Recall**
 - Designed and conducted a within-subjects 2x2x4 factorial experiment with significant treatment effects.
-- Completed a literature review, developed a testable hypothesis, and ran a power analysis to inform sample size.
+- Completed a literature review, outlined a hypothesis, and conducted a power analysis to inform sample size.
 - Built linear regressions of increasing complexity, and summarized findings/limitations in a scientific paper.
 - Highlighted skills and tools: Qualtrics (survey and data collection), R (analysis/modeling), linear regressions, power analysis with randomization inference, Extreme Value Bounds (EVB) and attrition analysis, R Markdown (paper writing).
 
