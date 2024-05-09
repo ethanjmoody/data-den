@@ -17,9 +17,9 @@ Each project includes comprehensive code, notes on key findings, and visualizati
 Project materials reside in `individual folders`, labeled by project name. Below are brief descriptions of each featured project, along with the skills and tools used to develop them:
 
 :mag: **From RAGs to Riches: How Search and Q&A Capabilities with RAG can Accelerate E&M Workflows**
-- Implemented a Retrieval-Augmented Generation (RAG) system to generate answers to NLP and GenAI questions.
-- Evaluated the impacts of embedding models, LLMs, document chunking, and prompt design on RAG performance.
-- Analyzed generated answers vs. ground-truths and scored >0.90 on both faithfulness and answer relevancy metrics.
+- Implemented a Retrieval-Augmented Generation (RAG) system to generate answers to NLP/GenAI questions.
+- Evaluated the impacts of embedding models, LLMs, document chunking, and prompting on RAG performance.
+- Analyzed generated answers vs. ground-truths, scoring >0.90 on faithfulness and answer relevancy.
 - Highlighted skills and tools: Python, LangChain, Qdrant vector stores, Hugging Face and pre-trained LLMs, prompt engineering, RAGAS and other RAG evaluation metrics (e.g., BERTScore), R Markdown (paper writing).
 
 :open_book: **Beyond Words: Exploring the Effects of Font Size & Pacing on Reading Enjoyment and Fact Recall**
