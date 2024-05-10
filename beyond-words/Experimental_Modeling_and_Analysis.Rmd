@@ -1,0 +1,1244 @@
+---
+title: "Beyond Words"
+subtitle: "Exploring the Effects of Font Size & Pacing on Reading Enjoyment and Fact Recall"
+author: "John Gibbons, Andre Gigena, Maria Manna, and Ethan Moody"
+date: "December 2023"
+abstract: "Existing research suggests that font and text characteristics can impact the way an individual engages with a reading experience. This study investigates the effect of font size and forced-pacing on reading enjoyment and fact recall. Participants were given a short survey that assigned them to (1) a random ordering of four font and pacing conditions and (2) a random ordering of four fictional stories. After reading each story, participants were asked to indicate their level of enjoyment with the reading task and to answer questions testing their recall of facts from the story. Results indicate that while the presentation of stories with a larger-than-normal font size has no consistently significant impact on reading enjoyment, applying forced-pacing to a reading experience significantly reduces reading enjoyment, constituting a main effect. Additionally, results suggest that neither font size nor pacing has a meaningful main effect on fact recall, and no significant interaction effects exist between font size and pacing on reading enjoyment or fact recall. These findings hold across several demographic and technological factors for English-speaking individuals --- including age, sex, education level, and digital device screen resolution --- indicating that observed effects are largely generalizable. They also offer valuable insights for the design of future digital reading experiences, optimized with user enjoyment in mind."
+output:
+  pdf_document: 
+    number_sections: false
+always_allow_html: yes
+---
+
+```{r set global options, include = FALSE}
+
+# Configure behavior of code chunks throughout document
+knitr::opts_chunk$set(include = FALSE, message = FALSE, warning = FALSE)
+
+```
+
+```{r initial setup, warning = FALSE, message = FALSE, include = FALSE}
+
+# Load packages
+library(data.table)
+library(readxl)
+library(dplyr)
+library(knitr)
+library(magrittr)
+library(sandwich)
+library(lmtest)
+library(stargazer)
+library(ggplot2)
+library(patchwork)
+library(foreign)
+library(gridExtra)
+#install.packages("tm")
+#install.packages("wordcloud2")
+library(tm)
+library(wordcloud2)
+
+```
+
+\setcounter{page}{1}
+
+# Introduction
+
+For many people, reading is an integral part of daily life. While the act of reading might seem unexceptional, it actually involves a remarkable sequence of complex visual and neurological processes. The evolution of technology has driven more stories, books, and articles to digital formats, causing readers to increasingly rely on these processes to interpret text presented in a variety of stylistic formats, background colors, and mediums --- including small and large font, light and dark color, and wide and narrow spacing.
+
+Prior research shows that these stylistic differences can play a pivotal role in shaping an individual's reading experience. For example, font size and font type have been extensively studied for their effects on readability and reading performance measures. Hojjati et al. (2014)\footnote{Hojjati, Nafiseh and Muniandy, Balakrishnan. (2014). The Effects of Font Type and Spacing of Text for Online Readability and Performance. Contemporary Educational Technology. 5. 10.30935/cedtech/6122.} and Wallace et al. (2022)\footnote{Shaun Wallace, Zoya Bylinskii, Jonathan Dobres, Bernard Kerr, Sam Berlow, Rick Treitman, Nirmal Kumawat, Kathleen Arpin, Dave B. Miller, Jeff Huang, and Ben D. Sawyer. 2022. Towards Individuated Reading Experiences: Different Fonts Increase Reading Speed for Different Individuals. ACM Trans. Comput.-Hum. Interact. 29, 4, Article 38 (August 2022), 56 pages. https://doi.org/10.1145/3502222.} examined the impact of font characteristics on text readability and reading speed, and found that certain fonts or letter arrangements produced a more positive reading experience and allowed for quicker average reading completion times than others. Additionally, Katzir et al. (2013)\footnote{Katzir T, Hershko S, Halamish V. The effect of font size on reading comprehension on second and fifth grade children: bigger is not always better. PLoS One. 2013;8(9):e74061. Published 2013 Sep 19. doi:10.1371/journal.pone.0074061.} and Rello et al. (2014)\footnote{Rello, Luz and Pielot, Martin and Marcos, Mari-Carmen. (2016). Make It Big!: The Effect of Font Size and Line Spacing on Online Readability. 3637-3648. 10.1145/2858036.2858204.} explored how font size affected reading comprehension across digital works, and found that larger fonts sometimes produced a positive impact on comprehension, depending on subject age.
+
+We aim to build on this research and simultaneously address a current gap in the literature by exploring how different digital reading formats impact the way someone feels about a reading task. We do this by investigating the effects of various font sizes and pacing conditions --- that is, how quickly one is moved (or paced) through a reading task --- on (A) a given individual's self-assessment of reading enjoyment (i.e., how much do they find a reading experience rewarding) and (B) that same individual's success with recalling basic facts from a reading task. In this way, our study offers a unique perspective on reading behaviors and outcomes by placing the focus more on *experiential* measures of reading rather than *performative* measures of reading (e.g., reading speed and deeper comprehension).  
+
+
+# Research Question, Theory, and Hypotheses
+
+We summarize our key research question this way: ***Does font size, pacing, or the combination of both font size and pacing impact reading enjoyment and/or fact recall following a reading task?*** More specifically, we seek to explore whether or not a causal link exists between (1) individuals' self-reported enjoyment and/or fact recall following a reading task and (2) the way that reading task is presented to them --- with large font or default-sized font, and with forced-pacing or self-pacing.
+
+We operate with the following null hypothesis and alternative hypothesis in mind:
+
+\begin{quote}
+  \textit{Null Hypothesis ($H_{0}$): There is no significant interaction between font size and pacing and no main effects of font size or pacing on either reading enjoyment or fact recall.}
+\end{quote}
+
+\begin{quote}
+  \textit{Alternative Hypothesis ($H_{A}$): There are significant main effects of font size and/or pacing on reading enjoyment or fact recall, and a significant interaction between font size and pacing on reading enjoyment or fact recall.}
+\end{quote}
+
+While we are hesitant to apply *a priori* directional assumptions to $H_{A}$, we ultimately theorize that a larger font should yield higher reading enjoyment and lower fact recall than a smaller font. We suspect this is because larger fonts increase readers' attention to content, decrease cognitive strain, and generate the perception of quicker progression through a task, which could both (A) tap into the brain's reward system and produce feelings of accomplishment and happiness, and (B) make it easier to gloss over words and miss certain details in the text. We also theorize that the introduction of forced-pacing within a reading experience should yield lower reading enjoyment but higher fact recall. We suspect this is because forced-pacing has the potential to overwhelm some readers and reduce their sense of "control" or autonomy (i.e., the ability to go at their own pace) while reading --- leading to an overall worse reading experience --- yet also encourage increased focus on the details of the task to keep up with the speed in which a reading is presented.
+
+
+# Experiment Design and Treatment
+
+To test our hypotheses, we conducted a within-subjects, survey-based experiment designed as a 2x2x4 factorial. The independent variables were font and pacing (termed "scrolling" within our experimental data and analysis), and four unique stories were randomly paired with each treatment condition to evaluate impacts on reading enjoyment (see the *Appendix* for copies of these stories). The stories were of similar length and difficulty, and were generated by ChatGPT.\footnote{OpenAI. (2023). ChatGPT 3.5 by OpenAI. Retrieved from https://www.openai.com/research/chatgpt.} There were three different treatment conditions and one control condition. A large font condition presented a randomly-selected story in 36pt font one sentence at a time, requiring participants to click the "next" button in the survey to proceed after each sentence. A pacing condition was accomplished using JavaScript code that automatically scrolled through lines of 12pt text from a randomly-selected story at a specified word-per-minute (WPM) rate.\footnote{The exact WPM used was 280, which is slightly higher than the speed at which most individuals read.} An interaction condition combined both large font (36pt) and pacing conditions into a single experience for a randomly-selected story.\footnote{The "experience" of scrolling differed in the interaction condition depending on how much text was presented on the screen in a single block. Shorter blocks of text scrolled more quickly, while longer blocks of text scrolled more slowly.} Finally, a control condition presented a randomly-selected story on a single page with 12pt (default) font and no pacing, allowing participants to read the story at their own leisure We employed the Qualtrics survey platform to design our full study experience and each reading task.\footnote{The data for this paper was generated using Qualtrics software, Version 10-11/2023 of Qualtrics. Copyright © 2023 Qualtrics. Qualtrics and all other Qualtrics product or service names are registered trademarks or trademarks of Qualtrics, Provo, UT, USA. https://www.qualtrics.com.}
+
+
+### Methods and Procedures
+
+Prior to experiment launch, we conducted three pilot studies to refine our survey design and enhance user experience. All pilot studies and the final experiment were administered on Qualtrics. Participants for the final pilot and official experiment were recruited and compensated through Prolific. Study participants were required to be English-speaking residents of the US or UK, and they could participate in the experiment by taking the survey on a mobile phone, tablet, or computer. A commit-to-complete question was posed before any treatment administration to discourage attrition, and participant consent was also obtained.
+
+In the survey, participants were first asked to rate their level of agreement with the statement "Reading is rewarding to me" on a 7-point Likert scale. This served as a baseline measurement for reading enjoyment. They were then presented with each of our four experimental conditions and readings. After each condition, participants were asked to rate their level of agreement with the statement "*This experience* of reading was rewarding to me" on the same 7-point Likert scale and were reminded of their baseline response. They were also asked to answer three multiple-choice questions about the story they just read to gauge fact recall. Finally, to minimize treatment persistence effects, participants were given a distractor task --- which involved clicking and dragging words into appropriate bins/categories (e.g., "Paris" into "places", "violin" into "musical instruments", "tennis" into "sports", etc.) --- before proceeding to the next reading. 
+
+After completing all four readings, participants were asked two optional free-form/write-in questions: (1) "What factors influenced your response each time you read the statement: Reading is rewarding to me?" and (2) "Please provide any thoughts about the reading experiences presented today." Participant comments on these two questions provided additional insights into the key factors contributing to their reading enjoyment scores and their overall study experience (as discussed briefly in the *Additional Insights* section). 
+
+Additional information about each participant was captured using metadata, Prolific-provided data, and pre-treatment study-specific questions. Primary variables of interest (model covariates) included device type, screen resolution, demographics, and whether participants used glasses or contacts for vision correction. reCAPTCHA was employed to deter bots and identify suspicious survey entries. Notably, a design oversight permitted 10 participants to take the survey multiple times. For these 10 individuals, data from only their first survey attempt was used within our analysis.
+
+Our final participant sample size was $N = 195$. Figure 1 depicts how this value ($N$) was affected by factors like pre-treatment participant departure, non-consent, repeat survey-takers, and pre-launch test records (as discussed further in the *Data Collection* section).
+
+```{r create figure 1: flow diagram, include = TRUE, echo = FALSE, fig.cap = "Experiment flow (CONSORT) diagram depicting study participants and sample size (N)", out.width = "75%", fig.align = 'center'}
+
+# Create figure 1
+fig1 <- knitr::include_graphics("Experiment_Flow_Diagram.png")
+
+# Display figure 1
+fig1
+
+```
+
+
+### Randomization and Outcome Measures
+
+A total of 22 participants (approximately 11.3% of our study sample) attrited either during or after receiving at least one treatment. All other study participants experienced all four treatment conditions and read all four stories. We employed multiple randomizers in the Qualtrics survey flow to (A) assign participants to one of the 24 possible treatment-story combination blocks, and (B) shuffle the order of these combinations to generate 24 different arrangements per block. This yielded 576 equally likely unique treatment experiences/randomizations. Figure 2 displays a block of 24 possible treatment-story combinations, utilizing color to depict stories and subscripts to depict treatment conditions. For space and brevity, all 576 total unique arrangements of each treatment-story combination are not shown.
+
+```{r create figure 2: ROXO diagram, include = TRUE, echo = FALSE, fig.cap = "ROXO diagram depicting experimental design and within-subjects comparisons", out.width = "45%", fig.align = 'center'}
+
+# Create figure 2
+fig2 <- knitr::include_graphics("ROXO.png")
+
+# Display figure 2
+fig2
+
+```
+
+
+Our primary outcome variable was reading enjoyment (termed "enjoyment" throughout our experimental data and analysis), measured on a discrete 7-point Likert scale ranging from "strongly disagree" to "strongly agree." On this scale, a value of 1 ("strongly disagree") signaled lowest enjoyment, and a value of 7 ("strongly agree") signaled highest enjoyment. 
+
+Our secondary outcome variable was fact recall (termed "recall" throughout our experimental data and analysis). Participants were awarded 1 point for each correctly-answered recall question following a story. Each story had a maximum recall score of 3 points, and participants who answered no questions correctly received 0 points.
+
+
+# Power Calculation
+
+We conducted a power analysis to estimate experimental power prior to analyzing study results. For this analysis, we created synthetic data that mimicked our final experiment design using one control and three treatment conditions, and we focused exclusively on reading enjoyment rather than recall.
+
+In order to account for inherent differences between study participants (given our within-subjects experimental design), we created a variable called `offset` for power modeling, which corresponds to the baseline reading enjoyment value for each participant. We computed our final outcome variable ("enjoyment") as a sum of a participant's offset value and an assumed treatment effect, and utilized randomization inference to forecast various power values with different participant sample sizes. For simplicity, we assumed a modest treatment effect size of `+0.25` (i.e., increasing enjoyment on average by 0.25 units on the 7-point Likert scale) for all treatment conditions. Under this assumption, we observed that our experiment would be well-powered even at low sample sizes (i.e., between 75-100 participants), as shown in Figure 3. 
+
+```{r power analysis calculations, include = FALSE}
+
+# Synthetic data generation
+make_data <- function(
+    num_people   = 10, 
+    num_rounds   = 4,
+    treat_names  = c("control", "font", "scroll", "interaction"), 
+    treat_effect = 4) { 
+  
+  individual_offsets <- data.table(
+    id     = 1:num_people,
+    offset = rnorm(n=num_people, mean = 5, sd = 1)
+  )
+  
+  person_round <- data.table(expand.grid(id=1:num_people, round=1:num_rounds))
+
+  d <- person_round[individual_offsets, on="id"]
+  d[ , treat := sample(treat_names), by=id]
+  
+  #dp[ , treat_effect := 0L]
+  d[treat %in% c("font", "scroll", "interaction"), treat_effect := rnorm(n=.N,mean = treat_effect)]
+  d[!(treat %in% c("font", "scroll", "interaction")), treat_effect := 0]
+  d[ , any_treat := treat %in% c("font", "scroll", "interaction")]
+  
+  # Consider whether or not a negative `treat_effect` is better suited given potential round effects
+  d[ , Y := offset + treat_effect]
+  d$Y[d$Y >= 7] <- 7
+  d$Y[d$Y <= 1] <- 1
+  return(d)
+}
+
+# Set parameters for randomization inference and power modeling
+population_sample <- c(20,40,60,80,100,120,140,160,180)
+simulation_loops <- 100
+power_values_any_treat <- rep(NA, length(population_sample))
+i <- 1
+
+# Run randomization inference and power estimation
+for (population in population_sample) {
+  
+  # Initialize vectors for p values for all treatment betas
+  p_values_any_treat <- rep(NA, 100) 
+  
+  for (sim in 1:simulation_loops) {
+       
+      # Generate data 
+      sampled_data <- make_data(treat_effect = 0.25, num_people = population)
+      
+      # Fit model
+      base <- lm(Y ~ any_treat + offset, data = sampled_data)
+      summary_2 <- coeftest(base, vcov. = vcovCL(base, cluster= ~ id))
+      
+      # Extract p values
+      p_values_all <- summary_2[,'Pr(>|t|)']
+      p_values_any_treat[sim] <-  p_values_all[2]
+  }
+  
+  # Calculate power
+  any_treat_p_value_rejects <- (sum(p_values_any_treat < .05))/ length(p_values_any_treat)
+  power_values_any_treat[i] <- any_treat_p_value_rejects
+  i <- i+1
+}
+
+# Plot power calculation results
+plot(x = population_sample, y = power_values_any_treat, col = 'blue', type = 'l', xlab = 'sample size', ylab = 'power', xlim = range(population_sample))
+title(main = 'Estimated Experimental Power Across Increasing Sample Sizes')
+
+```
+
+```{r create figure 3: power analysis, include = TRUE, echo = FALSE, fig.cap = "A pre-experiment power analysis chart showing estimated power under different sample size assumptions and an average treatment effect assumption of +0.25", out.width = "80%", fig.align = 'center'}
+
+# Create figure 3
+fig3 <- knitr::include_graphics("Power_Analysis_Chart.png")
+
+# Display figure 3
+fig3
+
+```
+
+
+# Experimental Data 
+
+```{r load and clean experiment data, warning = FALSE, include = FALSE}
+
+# Load final experiment data
+d <- data.table(
+  read_excel("Final_Experiment_Cleaned_Data-v10.12-09-2023.xlsx", na = "N/A")
+)
+
+# Perform data cleaning steps
+d <- d[Drop_Ind != 1]
+
+d[ , Treatment := as.numeric(Treat_Condition != "Control")]
+d[ , Font := as.numeric(Treat_Condition %in% c("Font", "Interaction"))]
+d[ , Scrolling := as.numeric(Treat_Condition %in% c("Scrolling", "Interaction"))]
+d[is.na(Sex), Sex := "Unspecified"] # Unknown category
+d[is.na(Age), Age := 99] # Unknown category, highest actual value is 91
+
+# Perform upper-bound imputation for EVB analysis - accounts for attrition
+d_upper <- copy(d)
+d_upper[is.na(Treat_Enjoy), Treat_Enjoy := 7] # Highest possible enjoyment rating
+d_upper[is.na(Treat_Recall), Treat_Recall := 3] # Highest possible recall score
+
+# Perform lower-bound imputation for EVB analysis - accounts for attrition
+d_lower <- copy(d)
+d_lower[is.na(Treat_Enjoy), Treat_Enjoy := 1] # Lowest possible enjoyment rating
+d_lower[is.na(Treat_Recall), Treat_Recall := 0] # Lowest possible recall score
+
+```
+
+
+### Data Collection
+
+Our final experimental dataset was comprised of (A) answers provided by study participants in our Qualtrics survey and (B) demographic/additional variables of interest (model covariates) for those participants provided by Prolific. A total of 232 survey responses were collected as part of the experiment. Of these 232 responses, 16 were from testing conducted prior to experiment launch and were excluded from the final dataset. Additionally, 1 survey record was associated with a participant who declined consent after clicking on the experiment survey link, 6 records were associated with participants who exited the survey before being randomized into our treatment conditions, and 14 records were associated with 10 unique individuals who took the survey either two or three times. These additional 21 records were excluded from the final dataset, and for all 10 repeat-survey takers, only the first survey attempt was included in the final dataset. This filtering process yielded a final dataset containing 195 unique survey responses. Note that because we employed four treatment conditions for each participant, our sample size of $N = 195$ translates to 780 rows ($780 = 195 \times 4$) in our final dataset.
+
+Figure 4 shows the distributions of participants across our outcomes of interest --- reading enjoyment and fact recall --- categorized by whether each outcome was measured in the control, font, pacing (scrolling), or interaction condition. Both distributions are left-skewed, with enjoyment concentrated in the 5-7 region, and recall in the 2-3 region.
+
+```{r generate and save original distribution by condition plots, include = FALSE}
+
+# Enjoyment
+enjoyment_dist_cond <- reshape2::melt(d[, table(Treat_Enjoy, Treat_Condition)]) %>%
+  mutate(
+    Treat_Condition = factor(Treat_Condition, levels = c("Control", "Font", "Scrolling", "Interaction"))
+    ) %>%
+  ggplot(aes(x = Treat_Enjoy, y = value, fill = Treat_Condition)) +
+  geom_bar(stat = "identity", width = 0.7, position = position_dodge()) +
+  scale_x_continuous(breaks = seq(1, 7, by = 1)) +
+  scale_fill_manual("Condition", values = c("Control" = "#003f5c",
+                                            "Font" = "#7a5195",
+                                            "Scrolling" = "#ef5675",
+                                            "Interaction" = "#ffa600")) +
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
+  labs(title = "Enjoyment Distributions by Condition", x = "Enjoyment", y = "Count")
+
+# Recall
+recall_dist_cond <- reshape2::melt(d[, table(Treat_Recall, Treat_Condition)]) %>%
+  mutate(
+    Treat_Condition = factor(Treat_Condition, levels = c("Control", "Font", "Scrolling", "Interaction"))
+  ) %>%
+  ggplot(aes(x = Treat_Recall, y = value, fill = Treat_Condition)) +
+  geom_bar(stat = "identity", width = 0.7, position = position_dodge()) +
+  scale_x_continuous(breaks = seq(0, 7, by = 1)) +
+  scale_fill_manual("Condition", values = c("Control" = "#003f5c",
+                                            "Font" = "#7a5195",
+                                            "Scrolling" = "#ef5675",
+                                            "Interaction" = "#ffa600")) +
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
+  labs(title = "Recall Distributions by Condition", x = "Recall Score", y = "Count")
+
+# Save plots as image files
+ggsave("enjoyment_dist_by_cond.png", plot = enjoyment_dist_cond, width = 7, height = 2)
+ggsave("recall_dist_by_cond.png", plot = recall_dist_cond, width = 7, height = 2)
+
+```
+
+```{r create figure 4: distribution of outcomes by condition plots, include = TRUE, echo = FALSE, fig.cap = "Distribution of participants by experimental outcome measures: reading enjoyment (top) and fact recall (bottom)", out.height = "20%", fig.show = 'hold', fig.align = 'center'}
+
+# Create figure 4
+fig4 <- knitr::include_graphics(c("enjoyment_dist_by_cond.png", "recall_dist_by_cond.png"))
+
+# Display figure 4
+fig4
+
+```
+
+
+### Incomplete Data
+
+Exploratory data analysis (EDA) revealed that some of the demographic/additional variables of interest provided by Prolific were missing from participant records. For example, there were 17 participants for which the `Sex` variable was missing from the data, and a data value of *"Unspecified"* was used to populate these missing values. There were also 18 participants for which the `Age` variable was missing, and a data value of *99* was used to populate these missing values as an encoding for *"unknown"* (prior to this update, the previous maximum age in the data set was 91).
+
+Analysis also revealed 22 participants who attrited from the experiment, resulting in a total of 65 data rows which had missing enjoyment and recall measurements. As attrition can significantly impact the estimate of treatment effects, two additional datasets were prepared for extreme value bounds (EVB) analysis: a "lower bound" dataset, and an "upper bound" dataset. In the lower bound dataset, a value of *1* (the minimum possible value from the Likert scale for gauging reading enjoyment) was imputed to any missing enjoyment records, and a value of *0* (the minimum possible value for story recall questions) was imputed to any missing recall records. For the upper bound dataset, a value of *7* (the maximum possible value from the Likert scale for gauging reading enjoyment) was imputed to any missing enjoyment records, and a value of *3* (the maximum possible value for story recall questions) was imputed to any missing recall records. The resulting impacts on our overall (non-treatment specific) outcome distributions are displayed in Figure 5.
+
+```{r plot and save EVB distribution by condition plots, include = FALSE}
+
+# Enjoyment
+orig_data <- data.table(d[, table(Treat_Enjoy)])
+orig_data[, Dataset := "Original"]
+
+upper_data <- data.table(d_upper[, table(Treat_Enjoy)])
+upper_data[, Dataset := "Upper Bound Imputation"]
+
+lower_data <- data.table(d_lower[, table(Treat_Enjoy)])
+lower_data[, Dataset := "Lower Bound Imputation"]
+
+plot_data <- rbind(orig_data, upper_data, lower_data)
+
+enjoyment_dist_evb <- ggplot(plot_data, aes(x = Treat_Enjoy, y = N, fill = Dataset)) +
+  geom_bar(stat = "identity", width = 0.7, position=position_dodge()) +
+  scale_fill_manual("Dataset", values = c("Original" = "#bc5090",
+                                          "Lower Bound Imputation" = "#003f5c",
+                                          "Upper Bound Imputation" = "#ffa600")) +
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank()) +
+  labs(title = "Extreme Value Imputation Distributions - Enjoyment", x = "Enjoyment", y = "Count")
+
+# Recall
+orig_data <- data.table(d[, table(Treat_Recall)])
+orig_data[, Dataset := "Original"]
+
+upper_data <- data.table(d_upper[, table(Treat_Recall)])
+upper_data[, Dataset := "Upper Bound Imputation"]
+
+lower_data <- data.table(d_lower[, table(Treat_Recall)])
+lower_data[, Dataset := "Lower Bound Imputation"]
+
+plot_data <- rbind(orig_data, upper_data, lower_data)
+
+recall_dist_evb <- ggplot(plot_data, aes(x = Treat_Recall, y = N, fill = Dataset)) +
+  geom_bar(stat = "identity", width = 0.7, position=position_dodge()) +
+  scale_fill_manual("Dataset", values = c("Original" = "#bc5090",
+                                          "Lower Bound Imputation" = "#003f5c",
+                                          "Upper Bound Imputation" = "#ffa600")) +
+  labs(title = "Extreme Value Imputation Distributions - Recall", x = "Recall Score", y = "Count")
+
+# Save plots as image files
+ggsave("enjoyment_dist_evb.png", plot = enjoyment_dist_evb, width = 7, height = 2)
+ggsave("recall_dist_evb.png", plot = recall_dist_evb, width = 7, height = 2)
+
+```
+
+```{r create figure 5: distribution of outcomes by condition plots with EVB, include = TRUE, echo = FALSE, fig.cap = "Distribution of participants by experimental outcome measures with EVB applied: reading enjoyment (top) and fact recall (bottom)", out.height = "20%", fig.show = 'hold', fig.align = 'center'}
+
+# Create figure 5
+fig5 <- knitr::include_graphics(c("enjoyment_dist_evb.png", "recall_dist_evb.png"))
+
+# Display figure 5
+fig5
+
+```
+
+
+# Results and Models
+
+To understand the effects of treatment on outcomes, we evaluated a progression of modeling approaches for each outcome of interest. The first approach is a difference in means model. The second approach increases complexity by accounting for treatment-specific effects. The third approach builds on the second by including round effects. In general for estimating both outcome variables --- reading enjoyment (`enjoyment`) and fact recall (`recall`) --- we fit regressions of the form,
+
+$(1)\ \widehat{y} = \beta_0 + \beta_1\cdot baseline + \mathbf{Z\gamma}$,
+
+$(2)\ \widehat{y} = \beta_0 + \beta_1\cdot baseline + \beta_2\cdot font + \beta_3\cdot scrolling + \beta_4\cdot (font*scrolling) + \mathbf{Z\gamma}$, and
+
+$(3)\ \widehat{y} = \beta_0 + \beta_1\cdot baseline + \beta_2\cdot font + \beta_3\cdot scrolling + \beta_4\cdot (font*scrolling) + \beta_5\cdot r_2 + \beta_6\cdot r_3 + \beta_7\cdot r_4 + \mathbf{Z\gamma}$,
+
+where $\widehat{y}$ is a modeled estimate for either `enjoyment` or `recall`, $\beta_0$ is a constant, $\beta_1$ is the change to the estimate ("marginal change") driven by each unit of increase in an individual's `baseline` level of reading enjoyment, $\beta_2$ is the marginal change driven by the presence of the `font` treatment condition, $\beta_3$ is the marginal change driven by the presence of the `scrolling` (or pacing) treatment condition, $\beta_4$ is the *additional* marginal change *beyond* the marginal changes driven by the `font` and `scrolling` coefficients of experiencing both the `font` and `scrolling` treatments concurrently, $\beta_5$ is the marginal change resulting from $r_2$ (round 2) of treatment, $\beta_6$ is the marginal change resulting from $r_3$ (round 3) of treatment, $\beta_7$ is the marginal change resulting from $r_4$ (round 4) of treatment, $\mathbf{Z}$ is a row vector of additional covariates, and $\mathbf{\gamma}$ is a column vector of coefficients.
+
+Within each of these approaches, we evaluated four distinct models. The first model ("Base Model") includes our treatment coefficients of interest but no covariates. The second model ("Base Model + Covariates") adds individual fixed effects. These effects include `mobile device`\footnote{Mobile device indicates whether or not the participant took the survey on a mobile device, like a cell phone.}, `education level`, `glasses/contacts group`\footnote{Glasses/contacts groups include the following categorizations: (1) Participant does not require corrective lenses, (2) Participant requires corrective lenses for reading but was not wearing them at the time of experiment, (3) Participant usually requires corrective lenses and was wearing them for the experiment, and (4) Participant preferred not to answer.}, `screen resolution`, `age`, and `sex` indicators. The third and fourth models ("Lower Bound Imputation" and "Upper Bound Imputation") estimate treatment effects with lower bounds or upper bounds imputed/applied to missing data, respectively. These models also include individual fixed effects and serve to bound the true ATE (average treatment effect) for each treatment condition given experimental attrition.
+
+In the following model summary tables, statistical significance is calculated using Benjamini-Hochberg (BH) corrected p-values. Additionally, clustered standard errors --- where clustering occurs on participants' Prolific IDs --- are reported in parentheses.
+
+
+### Reading Enjoyment
+
+Table 1 shows the results of the difference in means models for the enjoyment outcome. Immediately apparent is the high statistical significance of the `Treatment` coefficient across these models. Notably, and contrary to our initial pre-experiment theory, the `Treatment` coefficient is negative for all of the models, meaning treatment conditions on average actually *decrease* enjoyment.
+
+The `Baseline Enjoyment` coefficient is also statistically significant across these models. This is an indication that reading enjoyment is a persistent trait and is predictive of enjoyment, regardless of treatment condition.
+
+```{r Difference in means models, warning = FALSE, echo = FALSE, include = TRUE, results = 'asis'}
+
+# No fixed effects
+enjoy_base <- d[ , lm(Treat_Enjoy ~ Treatment + Baseline_Enjoy)]
+
+enjoy_base_cse <- sqrt(diag(vcovCL(enjoy_base, cluster = d$Prolific_Participant_ID)))
+
+# Fixed effects
+enjoy_base_fe <- d[ , lm(Treat_Enjoy ~ Treatment + Baseline_Enjoy + Mobile_Device_Ind +
+                           Education_Level + Glasses_Contacts_Group + Resolution +
+                           as.factor(Age) + Sex)]
+
+enjoy_base_fe_lower <- d_lower[ , lm(Treat_Enjoy ~ Treatment + Baseline_Enjoy + Mobile_Device_Ind +
+                           Education_Level + Glasses_Contacts_Group + Resolution +
+                           as.factor(Age) + Sex)]
+
+enjoy_base_fe_upper <- d_upper[ , lm(Treat_Enjoy ~ Treatment + Baseline_Enjoy + Mobile_Device_Ind +
+                           Education_Level + Glasses_Contacts_Group + Resolution +
+                           as.factor(Age) + Sex)]
+
+enjoy_base_fe_cse <- sqrt(diag(vcovCL(enjoy_base_fe, cluster = d$Prolific_Participant_ID)))
+enjoy_base_fe_cse_lower <- sqrt(diag(vcovCL(enjoy_base_fe_lower, cluster = d$Prolific_Participant_ID)))
+enjoy_base_fe_cse_upper <- sqrt(diag(vcovCL(enjoy_base_fe_upper, cluster = d$Prolific_Participant_ID)))
+
+summary_base                <- summary(enjoy_base)
+summary_base_fixed_effects  <- summary(enjoy_base_fe)
+summary_base_fixed_effects_lower  <- summary(enjoy_base_fe_lower)
+summary_base_fixed_effects_upper  <- summary(enjoy_base_fe_upper)
+
+
+p_base_values                   <- summary_base$coefficients[,"Pr(>|t|)"]
+p_base_treatment                <- p_base_values["Treatment"]
+p_base_intercept                <- p_base_values["(Intercept)"]
+p_base_baseline                 <- p_base_values["Baseline_Enjoy"]
+
+p_base_fixed_values             <- summary_base_fixed_effects$coefficients[,"Pr(>|t|)"]
+p_base_fixed_treatment          <- p_base_fixed_values["Treatment"]
+p_base_fixed_intercept          <- p_base_fixed_values["(Intercept)"]
+p_base_fixed_baseline           <- p_base_fixed_values["Baseline_Enjoy"]
+
+p_base_fixed_values_lower       <- summary_base_fixed_effects_lower$coefficients[,"Pr(>|t|)"]
+p_base_fixed_treatment_lower    <- p_base_fixed_values_lower["Treatment"]
+p_base_fixed_intercept_lower    <- p_base_fixed_values_lower["(Intercept)"]
+p_base_fixed_baseline_lower     <- p_base_fixed_values_lower["Baseline_Enjoy"]
+
+p_base_fixed_values_upper       <- summary_base_fixed_effects_upper$coefficients[,"Pr(>|t|)"]
+p_base_fixed_treatment_upper    <- p_base_fixed_values_upper["Treatment"]
+p_base_fixed_intercept_upper    <- p_base_fixed_values_upper["(Intercept)"]
+p_base_fixed_baseline_upper     <- p_base_fixed_values_upper["Baseline_Enjoy"]
+
+
+
+vector_p_values_base <- c(p_base_treatment,p_base_baseline,p_base_intercept,
+                          p_base_fixed_treatment,p_base_fixed_baseline,p_base_fixed_intercept,
+                          p_base_fixed_treatment_lower,p_base_fixed_baseline_lower,p_base_fixed_intercept_lower,
+                          p_base_fixed_treatment_upper,p_base_fixed_baseline_upper,p_base_fixed_intercept_upper)
+
+
+BH_corrected_p_values_base <- p.adjust(vector_p_values_base, method = "BH")
+
+
+new_p_values_base               <- c(BH_corrected_p_values_base[1], BH_corrected_p_values_base[2], BH_corrected_p_values_base[3])
+new_p_values_base_fixed         <- c(BH_corrected_p_values_base[4], BH_corrected_p_values_base[5], BH_corrected_p_values_base[6])
+new_p_values_base_fixed_lower   <- c(BH_corrected_p_values_base[7], BH_corrected_p_values_base[8], BH_corrected_p_values_base[9])
+new_p_values_base_fixed_upper   <- c(BH_corrected_p_values_base[10], BH_corrected_p_values_base[11], BH_corrected_p_values_base[12])
+
+
+
+stargazer(enjoy_base, enjoy_base_fe, enjoy_base_fe_lower, enjoy_base_fe_upper,
+          title = "Difference in Means Models (Enjoyment Outcome)",
+          type = "latex", header = FALSE, dep.var.labels = c("Enjoyment (Likert Scale from 1-7)"),
+          covariate.labels = c("Treatment", "Baseline Enjoyment", "Constant"),
+          column.labels = c("Base Model", "Base Model + Covariates", "Lower Bound Imputation", "Upper Bound Imputation"),
+          omit = c("Mobile_Device_Ind", "Education_Level", "Glasses_Contacts_Group", "Resolution", "factor", "Sex"),
+          add.lines = list(c("Individual Fixed Effects", "No", "Yes", "Yes", "Yes")),
+          notes = c("Clustered standard errors in parentheses",
+                    "Statistical significance calculated using Benjamini-Hochberg-corrected p-values",
+                    "Individual Fixed Effects include: Mobile Device, Education Level, Glasses/Contacts Group, Screen Resolution, Age, and Sex"),
+          se=list(enjoy_base_cse, enjoy_base_fe_cse, enjoy_base_fe_cse_lower, enjoy_base_fe_cse_upper),
+          p = list(new_p_values_base, new_p_values_base_fixed, new_p_values_base_fixed_lower, new_p_values_base_fixed_upper),
+          style = "default",
+          font.size = "tiny",
+          column.sep.width = "1pt"
+          )
+
+```
+
+Table 2 builds on the previous series of models by estimating treatment-specific effects. This is accomplished by utilizing indicator variables for when a participant is in the font treatment, the pacing treatment, and the interaction (combination of font and pacing) treatment. Note that when a participant is in the interaction treatment, the `Font`, `Scrolling`, and `Font:Scrolling` indicators are all active and their corresponding coefficients sum to give the ATE of the interaction treatment.
+
+These models, like the previous ones, show that `Baseline Enjoyment` is a strong predictor of enjoyment regardless of treatment condition. Additionally, the negative sign on all treatment coefficients indicates that treatment conditions tend to reduce reading enjoyment. The pacing (scrolling) treatment shows a larger and more statistically significant effect on decreasing reading enjoyment than the font treatment. This effect remains statistically significant for the "Upper Bound Imputation" model. That is, even in the scenario where reading enjoyment is assumed to be *maximized* for participants who attrited, there is evidence to suggest that forced-pacing still decreases reading enjoyment.
+
+```{r treatment-specific models, warning = FALSE, echo = FALSE, include = TRUE, results = 'asis'}
+
+# No fixed effects
+treat_effects <- d[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy)]
+
+treat_effects_cse <- sqrt(diag(vcovCL(treat_effects, cluster = d$Prolific_Participant_ID)))
+
+# Fixed effects
+
+treat_effects_fe <- d[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+treat_effects_fe_lower <- d_lower[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+treat_effects_fe_upper <- d_upper[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+treat_effects_fe_cse <- sqrt(diag(vcovCL(treat_effects_fe, cluster = d$Prolific_Participant_ID)))
+treat_effects_fe_cse_lower <- sqrt(diag(vcovCL(treat_effects_fe_lower, cluster = d$Prolific_Participant_ID)))
+treat_effects_fe_cse_upper <- sqrt(diag(vcovCL(treat_effects_fe_upper, cluster = d$Prolific_Participant_ID)))
+
+# Rename because of strange error (see https://stackoverflow.com/questions/74335392/stargazer-output-several-models-r/75095281#75095281)
+te_fe <- treat_effects_fe
+te_fe_l <- treat_effects_fe_lower
+te_fe_u <- treat_effects_fe_upper
+
+summary_treat                <- summary(treat_effects)
+summary_treat_fixed_effects  <- summary(treat_effects_fe)
+summary_treat_fixed_effects_lower  <- summary(treat_effects_fe_lower)
+summary_treat_fixed_effects_upper  <- summary(treat_effects_fe_upper)
+
+
+p_treat_values                   <- summary_treat$coefficients[,"Pr(>|t|)"]
+p_treat_font                     <- p_treat_values["Font"]
+p_treat_scrolling                <- p_treat_values["Scrolling"]
+p_treat_interaction              <- p_treat_values["Font:Scrolling"]
+p_treat_intercept                <- p_treat_values["(Intercept)"]
+p_treat_baseline                 <- p_treat_values["Baseline_Enjoy"]
+
+p_treat_fixed_values             <- summary_treat_fixed_effects$coefficients[,"Pr(>|t|)"]
+p_treat_fixed_font               <- p_treat_fixed_values["Font"]
+p_treat_fixed_scrolling          <- p_treat_fixed_values["Scrolling"]
+p_treat_fixed_interaction        <- p_treat_fixed_values["Font:Scrolling"]
+p_treat_fixed_intercept          <- p_treat_fixed_values["(Intercept)"]
+p_treat_fixed_baseline           <- p_treat_fixed_values["Baseline_Enjoy"]
+
+p_treat_fixed_values_lower       <- summary_treat_fixed_effects_lower$coefficients[,"Pr(>|t|)"]
+p_treat_fixed_font_lower         <- p_treat_fixed_values_lower["Font"]
+p_treat_fixed_scrolling_lower    <- p_treat_fixed_values_lower["Scrolling"]
+p_treat_fixed_interaction_lower  <- p_treat_fixed_values_lower["Font:Scrolling"]
+p_treat_fixed_intercept_lower    <- p_treat_fixed_values_lower["(Intercept)"]
+p_treat_fixed_baseline_lower     <- p_treat_fixed_values_lower["Baseline_Enjoy"]
+
+p_treat_fixed_values_upper       <- summary_treat_fixed_effects_upper$coefficients[,"Pr(>|t|)"]
+p_treat_fixed_font_upper         <- p_treat_fixed_values_upper["Font"]
+p_treat_fixed_scrolling_upper    <- p_treat_fixed_values_upper["Scrolling"]
+p_treat_fixed_interaction_upper  <- p_treat_fixed_values_upper["Font:Scrolling"]
+p_treat_fixed_intercept_upper    <- p_treat_fixed_values_upper["(Intercept)"]
+p_treat_fixed_baseline_upper     <- p_treat_fixed_values_upper["Baseline_Enjoy"]
+
+
+
+vector_p_values_treat <-c(p_treat_font,p_treat_scrolling,p_treat_baseline,p_treat_interaction,p_treat_intercept,
+                          p_treat_fixed_font,p_treat_fixed_scrolling,p_treat_fixed_baseline,p_treat_fixed_interaction,p_treat_fixed_intercept,
+                          p_treat_fixed_font_lower,p_treat_fixed_scrolling_lower,p_treat_fixed_baseline_lower,p_treat_fixed_interaction_lower,p_treat_fixed_intercept_lower,
+                          p_treat_fixed_font_upper,p_treat_fixed_scrolling_upper,p_treat_fixed_baseline_upper,p_treat_fixed_interaction_upper,p_treat_fixed_intercept_upper)
+
+
+BH_corrected_p_values_treat <- p.adjust(vector_p_values_treat, method = "BH")
+
+
+new_p_values_treat               <- c(BH_corrected_p_values_treat[1], BH_corrected_p_values_treat[2], BH_corrected_p_values_treat[3], BH_corrected_p_values_treat[4], BH_corrected_p_values_treat[5])
+new_p_values_treat_fixed         <- c(BH_corrected_p_values_treat[6], BH_corrected_p_values_treat[7], BH_corrected_p_values_treat[8], BH_corrected_p_values_treat[9], BH_corrected_p_values_treat[10])
+new_p_values_treat_fixed_lower   <- c(BH_corrected_p_values_treat[11], BH_corrected_p_values_treat[12], BH_corrected_p_values_treat[13], BH_corrected_p_values_treat[14], BH_corrected_p_values_treat[15])
+new_p_values_treat_fixed_upper   <- c(BH_corrected_p_values_treat[16], BH_corrected_p_values_treat[17], BH_corrected_p_values_treat[18], BH_corrected_p_values_treat[19], BH_corrected_p_values_treat[20])
+
+
+
+stargazer(treat_effects, te_fe, te_fe_l, te_fe_u,
+          title = "Treatment-Specific Models (Enjoyment Outcome)",
+          type = "latex", header = FALSE, dep.var.labels = c("Enjoyment (Likert Scale from 1-7)"),
+          covariate.labels = c("Font", "Scrolling", "Baseline Enjoyment", "Font:Scrolling", "Constant"),
+          column.labels = c("treat Model", "treat Model + Covariates", "Lower Bound Imputation", "Upper Bound Imputation"),
+          omit = c("Mobile_Device_Ind", "Education_Level", "Glasses_Contacts_Group", "Resolution", "factor", "Sex"),
+          add.lines = list(c("Individual Fixed Effects", "No", "Yes", "Yes", "Yes")),
+          notes = c("Clustered standard errors in parentheses",
+                    "Statistical significance calculated using Benjamini-Hochberg-corrected p-values",
+                    "Individual Fixed Effects include: Mobile Device, Education Level, Glasses/Contacts Group, Screen Resolution, Age, and Sex"),
+          se=list(treat_effects_cse, treat_effects_fe_cse, treat_effects_fe_cse_lower, treat_effects_fe_cse_upper),
+          p = list(new_p_values_treat, new_p_values_treat_fixed, new_p_values_treat_fixed_lower, new_p_values_treat_fixed_upper),
+          style = "default",
+          font.size = "tiny",
+          column.sep.width = "1pt"
+          )
+
+```
+
+Table 3 builds on the previous model by including round effects. This is accomplished by using indicator variables for `Second Round`, `Third Round`, and `Fourth Round` (implying that the `Constant` incorporates the effect of the `First Round`).
+
+Due to the randomization design of the experiment, the treatment-specific coefficient estimates change only marginally with the inclusion of the round effects coefficients. The `Second Round` coefficients show a negative effect on enjoyment, but none of these estimates are significantly different from no effect on enjoyment. However, both the `Third Round` and `Fourth Round` coefficients have a statistically significant negative effect on reading enjoyment. Potential explanations for this result include participant fatigue toward the end of the experiment or persistent effects from previous treatment conditions.
+
+```{r Round effects models, warning = FALSE, echo = FALSE, include = TRUE, results = 'asis'}
+
+# No fixed effects
+round_effects <- d[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID)]
+
+round_effects_cse <- sqrt(diag(vcovCL(round_effects, cluster = d$Prolific_Participant_ID)))
+
+# Fixed effects
+
+round_effects_fe <- d[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+round_effects_fe_lower <- d_lower[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+round_effects_fe_upper <- d_upper[ , lm(Treat_Enjoy ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+round_effects_fe_cse <- sqrt(diag(vcovCL(round_effects_fe, cluster = d$Prolific_Participant_ID)))
+round_effects_fe_cse_lower <- sqrt(diag(vcovCL(round_effects_fe_lower, cluster = d$Prolific_Participant_ID)))
+round_effects_fe_cse_upper <- sqrt(diag(vcovCL(round_effects_fe_upper, cluster = d$Prolific_Participant_ID)))
+
+# Rename because of strange error (see https://stackoverflow.com/questions/74335392/stargazer-output-several-models-r/75095281#75095281)
+re_fe <- round_effects_fe
+re_fe_l <- round_effects_fe_lower
+re_fe_u <- round_effects_fe_upper
+
+
+summary_round                <- summary(round_effects)
+summary_round_fixed_effects  <- summary(round_effects_fe)
+summary_round_fixed_effects_lower  <- summary(round_effects_fe_lower)
+summary_round_fixed_effects_upper  <- summary(round_effects_fe_upper)
+
+
+p_round_values                   <- summary_round$coefficients[,"Pr(>|t|)"]
+p_round_font                     <- p_round_values["Font"]
+p_round_scrolling                <- p_round_values["Scrolling"]
+p_round_interaction              <- p_round_values["Font:Scrolling"]
+p_round_intercept                <- p_round_values["(Intercept)"]
+p_round_baseline                 <- p_round_values["Baseline_Enjoy"]
+p_round_2                        <- p_round_values["Round_ID2"]
+p_round_3                        <- p_round_values["Round_ID3"]
+p_round_4                        <- p_round_values["Round_ID4"]
+
+p_round_fixed_values             <- summary_round_fixed_effects$coefficients[,"Pr(>|t|)"]
+p_round_fixed_font               <- p_round_fixed_values["Font"]
+p_round_fixed_scrolling          <- p_round_fixed_values["Scrolling"]
+p_round_fixed_interaction        <- p_round_fixed_values["Font:Scrolling"]
+p_round_fixed_intercept          <- p_round_fixed_values["(Intercept)"]
+p_round_fixed_baseline           <- p_round_fixed_values["Baseline_Enjoy"]
+p_round_2_fixed                  <- p_round_values["Round_ID2"]
+p_round_3_fixed                  <- p_round_values["Round_ID3"]
+p_round_4_fixed                  <- p_round_values["Round_ID4"]
+
+p_round_fixed_values_lower       <- summary_round_fixed_effects_lower$coefficients[,"Pr(>|t|)"]
+p_round_fixed_font_lower         <- p_round_fixed_values_lower["Font"]
+p_round_fixed_scrolling_lower    <- p_round_fixed_values_lower["Scrolling"]
+p_round_fixed_interaction_lower  <- p_round_fixed_values_lower["Font:Scrolling"]
+p_round_fixed_intercept_lower    <- p_round_fixed_values_lower["(Intercept)"]
+p_round_fixed_baseline_lower     <- p_round_fixed_values_lower["Baseline_Enjoy"]
+p_round_2_fixed_lower            <- p_round_values["Round_ID2"]
+p_round_3_fixed_lower            <- p_round_values["Round_ID3"]
+p_round_4_fixed_lower            <- p_round_values["Round_ID4"]
+
+p_round_fixed_values_upper       <- summary_round_fixed_effects_upper$coefficients[,"Pr(>|t|)"]
+p_round_fixed_font_upper         <- p_round_fixed_values_upper["Font"]
+p_round_fixed_scrolling_upper    <- p_round_fixed_values_upper["Scrolling"]
+p_round_fixed_interaction_upper  <- p_round_fixed_values_upper["Font:Scrolling"]
+p_round_fixed_intercept_upper    <- p_round_fixed_values_upper["(Intercept)"]
+p_round_fixed_baseline_upper     <- p_round_fixed_values_upper["Baseline_Enjoy"]
+p_round_2_fixed_upper            <- p_round_values["Round_ID2"]
+p_round_3_fixed_upper            <- p_round_values["Round_ID3"]
+p_round_4_fixed_upper            <- p_round_values["Round_ID4"]
+
+
+
+vector_p_values_round <-c(p_round_font,p_round_scrolling,p_round_baseline,p_round_2,p_round_3,p_round_4,p_round_interaction,p_round_intercept,
+                          p_round_fixed_font,p_round_fixed_scrolling,p_round_fixed_baseline,p_round_2_fixed,p_round_3_fixed,p_round_4_fixed,p_round_fixed_interaction,p_round_fixed_intercept,
+                          p_round_fixed_font_lower,p_round_fixed_scrolling_lower,p_round_fixed_baseline_lower,p_round_2_fixed_lower,p_round_3_fixed_lower,p_round_4_fixed_lower,p_round_fixed_interaction_lower,p_round_fixed_intercept_lower,
+                          p_round_fixed_font_upper,p_round_fixed_scrolling_upper,p_round_fixed_baseline_upper,p_round_2_fixed_upper,p_round_3_fixed_upper,p_round_4_fixed_upper,p_round_fixed_interaction_upper,p_round_fixed_intercept_upper)
+
+
+BH_corrected_p_values_round <- p.adjust(vector_p_values_round, method = "BH")
+
+
+new_p_values_round               <- c(BH_corrected_p_values_round[1], BH_corrected_p_values_round[2], BH_corrected_p_values_round[3], BH_corrected_p_values_round[4], BH_corrected_p_values_round[5], BH_corrected_p_values_round[6], BH_corrected_p_values_round[7],  BH_corrected_p_values_round[8])
+
+new_p_values_round_fixed         <- c(BH_corrected_p_values_round[9], BH_corrected_p_values_round[10], BH_corrected_p_values_round[11], BH_corrected_p_values_round[12], BH_corrected_p_values_round[13], BH_corrected_p_values_round[14], BH_corrected_p_values_round[15],  BH_corrected_p_values_round[16])
+
+new_p_values_round_fixed_lower   <- c(BH_corrected_p_values_round[17], BH_corrected_p_values_round[18], BH_corrected_p_values_round[19], BH_corrected_p_values_round[20], BH_corrected_p_values_round[21], BH_corrected_p_values_round[22], BH_corrected_p_values_round[23],  BH_corrected_p_values_round[24])
+
+new_p_values_round_fixed_upper   <- c(BH_corrected_p_values_round[25], BH_corrected_p_values_round[26], BH_corrected_p_values_round[27], BH_corrected_p_values_round[28], BH_corrected_p_values_round[29], BH_corrected_p_values_round[30], BH_corrected_p_values_round[31],  BH_corrected_p_values_round[32])
+
+
+
+
+stargazer(round_effects, re_fe, re_fe_l, re_fe_u,
+          type = "latex", header = FALSE, dep.var.labels = c("Enjoyment (Likert Scale from 1-7)"),
+          title = "Round Effects Models (Enjoyment Outcome)",
+          covariate.labels = c("Font", "Scrolling", "Baseline Enjoyment", "Second Round", "Third Round", "Fourth Round", "Font:Scrolling", "Constant"),
+          column.labels = c("Base Model", "Base Model + Covariates", "Lower Bound Imputation", "Upper Bound Imputation"),
+          omit = c("Mobile_Device_Ind", "Education_Level", "Glasses_Contacts_Group", "Resolution", "factor", "Sex"),
+          add.lines = list(c("Individual Fixed Effects", "No", "Yes", "Yes", "Yes")),
+          notes = c("Clustered standard errors in parentheses",
+                    "Statistical significance calculated using Benjamini-Hochberg-corrected p-values",
+                    "Individual Fixed Effects include: Mobile Device, Education Level, Glasses/Contacts Group, Screen Resolution, Age, and Sex"),
+          se=list(round_effects_cse, round_effects_fe_cse, round_effects_fe_cse_lower, round_effects_fe_cse_upper),
+          p = list(new_p_values_round, new_p_values_round_fixed, new_p_values_round_fixed_lower, new_p_values_round_fixed_upper),
+          style = "default",
+          font.size = "tiny",
+          column.sep.width = "1pt"
+          )
+
+```
+
+
+### Fact Recall
+
+We applied the same model progression to evaluate fact recall. Table 4 shows the results of the difference in means models. Here, the `Constant` term is highly statistically significant across all models and approximates the maximum recall score of 3. Potential explanations for this outcome include simple readings, simple recall questions, or high intelligence across experimental participants. On average, our experimental treatments had no impact on recall.
+
+```{r Difference in means recall, warning = FALSE, echo = FALSE, include = TRUE, results = 'asis'}
+
+# No fixed effects
+enjoy_base <- d[ , lm(Treat_Recall ~ Treatment + Baseline_Enjoy)]
+
+enjoy_base_cse <- sqrt(diag(vcovCL(enjoy_base, cluster = d$Prolific_Participant_ID)))
+
+# Fixed effects
+enjoy_base_fe <- d[ , lm(Treat_Recall ~ Treatment + Baseline_Enjoy + Mobile_Device_Ind +
+                           Education_Level + Glasses_Contacts_Group + Resolution +
+                           as.factor(Age) + Sex)]
+
+enjoy_base_fe_lower <- d_lower[ , lm(Treat_Recall ~ Treatment + Baseline_Enjoy + Mobile_Device_Ind +
+                           Education_Level + Glasses_Contacts_Group + Resolution +
+                           as.factor(Age) + Sex)]
+
+enjoy_base_fe_upper <- d_upper[ , lm(Treat_Recall ~ Treatment + Baseline_Enjoy + Mobile_Device_Ind +
+                           Education_Level + Glasses_Contacts_Group + Resolution +
+                           as.factor(Age) + Sex)]
+
+enjoy_base_fe_cse <- sqrt(diag(vcovCL(enjoy_base_fe, cluster = d$Prolific_Participant_ID)))
+enjoy_base_fe_cse_lower <- sqrt(diag(vcovCL(enjoy_base_fe_lower, cluster = d$Prolific_Participant_ID)))
+enjoy_base_fe_cse_upper <- sqrt(diag(vcovCL(enjoy_base_fe_upper, cluster = d$Prolific_Participant_ID)))
+
+summary_base                <- summary(enjoy_base)
+summary_base_fixed_effects  <- summary(enjoy_base_fe)
+summary_base_fixed_effects_lower  <- summary(enjoy_base_fe_lower)
+summary_base_fixed_effects_upper  <- summary(enjoy_base_fe_upper)
+
+
+p_base_values                   <- summary_base$coefficients[,"Pr(>|t|)"]
+p_base_treatment                <- p_base_values["Treatment"]
+p_base_intercept                <- p_base_values["(Intercept)"]
+p_base_baseline                 <- p_base_values["Baseline_Enjoy"]
+
+p_base_fixed_values             <- summary_base_fixed_effects$coefficients[,"Pr(>|t|)"]
+p_base_fixed_treatment          <- p_base_fixed_values["Treatment"]
+p_base_fixed_intercept          <- p_base_fixed_values["(Intercept)"]
+p_base_fixed_baseline           <- p_base_fixed_values["Baseline_Enjoy"]
+
+p_base_fixed_values_lower       <- summary_base_fixed_effects_lower$coefficients[,"Pr(>|t|)"]
+p_base_fixed_treatment_lower    <- p_base_fixed_values_lower["Treatment"]
+p_base_fixed_intercept_lower    <- p_base_fixed_values_lower["(Intercept)"]
+p_base_fixed_baseline_lower     <- p_base_fixed_values_lower["Baseline_Enjoy"]
+
+p_base_fixed_values_upper       <- summary_base_fixed_effects_upper$coefficients[,"Pr(>|t|)"]
+p_base_fixed_treatment_upper    <- p_base_fixed_values_upper["Treatment"]
+p_base_fixed_intercept_upper    <- p_base_fixed_values_upper["(Intercept)"]
+p_base_fixed_baseline_upper     <- p_base_fixed_values_upper["Baseline_Enjoy"]
+
+
+
+vector_p_values_base <- c(p_base_treatment,p_base_baseline,p_base_intercept,
+                          p_base_fixed_treatment,p_base_fixed_baseline,p_base_fixed_intercept,
+                          p_base_fixed_treatment_lower,p_base_fixed_baseline_lower,p_base_fixed_intercept_lower,
+                          p_base_fixed_treatment_upper,p_base_fixed_baseline_upper,p_base_fixed_intercept_upper)
+
+
+BH_corrected_p_values_base <- p.adjust(vector_p_values_base, method = "BH")
+
+
+new_p_values_base               <- c(BH_corrected_p_values_base[1], BH_corrected_p_values_base[2], BH_corrected_p_values_base[3])
+new_p_values_base_fixed         <- c(BH_corrected_p_values_base[4], BH_corrected_p_values_base[5], BH_corrected_p_values_base[6])
+new_p_values_base_fixed_lower   <- c(BH_corrected_p_values_base[7], BH_corrected_p_values_base[8], BH_corrected_p_values_base[9])
+new_p_values_base_fixed_upper   <- c(BH_corrected_p_values_base[10], BH_corrected_p_values_base[11], BH_corrected_p_values_base[12])
+
+stargazer(enjoy_base, enjoy_base_fe, enjoy_base_fe_lower, enjoy_base_fe_upper,
+          title = "Difference in Means Models (Recall Outcome)",
+          type = "latex", header = FALSE, dep.var.labels = c("Recall (Scored from 0-3)"),
+          covariate.labels = c("Treatment", "Baseline Enjoyment", "Constant"),
+          column.labels = c("Base Model", "Base Model + Covariates", "Lower Bound Imputation", "Upper Bound Imputation"),
+          omit = c("Mobile_Device_Ind", "Education_Level", "Glasses_Contacts_Group", "Resolution", "factor", "Sex"),
+          add.lines = list(c("Individual Fixed Effects", "No", "Yes", "Yes", "Yes")),
+          notes = c("Clustered standard errors in parentheses",
+                    "Statistical significance calculated using Benjamini-Hochberg-corrected p-values",
+                    "Individual Fixed Effects include: Mobile Device, Education Level, Glasses/Contacts Group, Screen Resolution, Age, and Sex"),
+          se=list(enjoy_base_cse, enjoy_base_fe_cse, enjoy_base_fe_cse_lower, enjoy_base_fe_cse_upper),
+          p = list(new_p_values_base, new_p_values_base_fixed, new_p_values_base_fixed_lower, new_p_values_base_fixed_upper),
+          style = "default",
+          font.size = "tiny",
+          column.sep.width = "1pt"
+          )
+
+```
+
+Table 5 includes treatment-specific effects for the models estimating recall. The `Font` coefficients are marginally greater than zero and the `Scrolling` coefficients are marginally less than zero. The lack of statistical significance and the marginal size of the effects preclude practical significance for these treatment conditions.
+
+```{r Treatment-specific models recall, warning = FALSE, echo = FALSE, include = TRUE, results = 'asis'}
+
+# No fixed effects
+treat_effects <- d[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy)]
+
+treat_effects_cse <- sqrt(diag(vcovCL(treat_effects, cluster = d$Prolific_Participant_ID)))
+
+# Fixed effects
+
+treat_effects_fe <- d[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+treat_effects_fe_lower <- d_lower[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+treat_effects_fe_upper <- d_upper[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+treat_effects_fe_cse <- sqrt(diag(vcovCL(treat_effects_fe, cluster = d$Prolific_Participant_ID)))
+treat_effects_fe_cse_lower <- sqrt(diag(vcovCL(treat_effects_fe_lower, cluster = d$Prolific_Participant_ID)))
+treat_effects_fe_cse_upper <- sqrt(diag(vcovCL(treat_effects_fe_upper, cluster = d$Prolific_Participant_ID)))
+
+# Rename because of strange error (see https://stackoverflow.com/questions/74335392/stargazer-output-several-models-r/75095281#75095281)
+te_fe <- treat_effects_fe
+te_fe_l <- treat_effects_fe_lower
+te_fe_u <- treat_effects_fe_upper
+
+summary_treat                <- summary(treat_effects)
+summary_treat_fixed_effects  <- summary(treat_effects_fe)
+summary_treat_fixed_effects_lower  <- summary(treat_effects_fe_lower)
+summary_treat_fixed_effects_upper  <- summary(treat_effects_fe_upper)
+
+
+p_treat_values                   <- summary_treat$coefficients[,"Pr(>|t|)"]
+p_treat_font                     <- p_treat_values["Font"]
+p_treat_scrolling                <- p_treat_values["Scrolling"]
+p_treat_interaction              <- p_treat_values["Font:Scrolling"]
+p_treat_intercept                <- p_treat_values["(Intercept)"]
+p_treat_baseline                 <- p_treat_values["Baseline_Enjoy"]
+
+p_treat_fixed_values             <- summary_treat_fixed_effects$coefficients[,"Pr(>|t|)"]
+p_treat_fixed_font               <- p_treat_fixed_values["Font"]
+p_treat_fixed_scrolling          <- p_treat_fixed_values["Scrolling"]
+p_treat_fixed_interaction        <- p_treat_fixed_values["Font:Scrolling"]
+p_treat_fixed_intercept          <- p_treat_fixed_values["(Intercept)"]
+p_treat_fixed_baseline           <- p_treat_fixed_values["Baseline_Enjoy"]
+
+p_treat_fixed_values_lower       <- summary_treat_fixed_effects_lower$coefficients[,"Pr(>|t|)"]
+p_treat_fixed_font_lower         <- p_treat_fixed_values_lower["Font"]
+p_treat_fixed_scrolling_lower    <- p_treat_fixed_values_lower["Scrolling"]
+p_treat_fixed_interaction_lower  <- p_treat_fixed_values_lower["Font:Scrolling"]
+p_treat_fixed_intercept_lower    <- p_treat_fixed_values_lower["(Intercept)"]
+p_treat_fixed_baseline_lower     <- p_treat_fixed_values_lower["Baseline_Enjoy"]
+
+p_treat_fixed_values_upper       <- summary_treat_fixed_effects_upper$coefficients[,"Pr(>|t|)"]
+p_treat_fixed_font_upper         <- p_treat_fixed_values_upper["Font"]
+p_treat_fixed_scrolling_upper    <- p_treat_fixed_values_upper["Scrolling"]
+p_treat_fixed_interaction_upper  <- p_treat_fixed_values_upper["Font:Scrolling"]
+p_treat_fixed_intercept_upper    <- p_treat_fixed_values_upper["(Intercept)"]
+p_treat_fixed_baseline_upper     <- p_treat_fixed_values_upper["Baseline_Enjoy"]
+
+
+
+vector_p_values_treat <-c(p_treat_font,p_treat_scrolling,p_treat_baseline,p_treat_interaction,p_treat_intercept,
+                          p_treat_fixed_font,p_treat_fixed_scrolling,p_treat_fixed_baseline,p_treat_fixed_interaction,p_treat_fixed_intercept,
+                          p_treat_fixed_font_lower,p_treat_fixed_scrolling_lower,p_treat_fixed_baseline_lower,p_treat_fixed_interaction_lower,p_treat_fixed_intercept_lower,
+                          p_treat_fixed_font_upper,p_treat_fixed_scrolling_upper,p_treat_fixed_baseline_upper,p_treat_fixed_interaction_upper,p_treat_fixed_intercept_upper)
+
+
+BH_corrected_p_values_treat <- p.adjust(vector_p_values_treat, method = "BH")
+
+
+new_p_values_treat               <- c(BH_corrected_p_values_treat[1], BH_corrected_p_values_treat[2], BH_corrected_p_values_treat[3], BH_corrected_p_values_treat[4], BH_corrected_p_values_treat[5])
+new_p_values_treat_fixed         <- c(BH_corrected_p_values_treat[6], BH_corrected_p_values_treat[7], BH_corrected_p_values_treat[8], BH_corrected_p_values_treat[9], BH_corrected_p_values_treat[10])
+new_p_values_treat_fixed_lower   <- c(BH_corrected_p_values_treat[11], BH_corrected_p_values_treat[12], BH_corrected_p_values_treat[13], BH_corrected_p_values_treat[14], BH_corrected_p_values_treat[15])
+new_p_values_treat_fixed_upper   <- c(BH_corrected_p_values_treat[16], BH_corrected_p_values_treat[17], BH_corrected_p_values_treat[18], BH_corrected_p_values_treat[19], BH_corrected_p_values_treat[20])
+
+
+
+stargazer(treat_effects, te_fe, te_fe_l, te_fe_u,
+          title = "Treatment-Specific Models (Recall Outcome)",
+          type = "latex", header = FALSE, dep.var.labels = c("Recall (Scored from 0-3)"),
+          covariate.labels = c("Font", "Scrolling", "Baseline Enjoyment", "Font:Scrolling", "Constant"),
+          column.labels = c("treat Model", "treat Model + Covariates", "Lower Bound Imputation", "Upper Bound Imputation"),
+          omit = c("Mobile_Device_Ind", "Education_Level", "Glasses_Contacts_Group", "Resolution", "factor", "Sex"),
+          add.lines = list(c("Individual Fixed Effects", "No", "Yes", "Yes", "Yes")),
+          notes = c("Clustered standard errors in parentheses",
+                    "Statistical significance calculated using Benjamini-Hochberg-corrected p-values",
+                    "Individual Fixed Effects include: Mobile Device, Education Level, Glasses/Contacts Group, Screen Resolution, Age, and Sex"),
+          se=list(treat_effects_cse, treat_effects_fe_cse, treat_effects_fe_cse_lower, treat_effects_fe_cse_upper),
+          p = list(new_p_values_treat, new_p_values_treat_fixed, new_p_values_treat_fixed_lower, new_p_values_treat_fixed_upper),
+          style = "default",
+          font.size = "tiny",
+          column.sep.width = "1pt"
+          )
+
+```
+
+Table 6 adds round effects to these models. Similar to the previous recall models, the `Constant` coefficient is most statistically significant and predictive. Meanwhile, treatment or round effects are not statistically significantly different from having no effect.
+
+```{r Round effects models recall, warning = FALSE, echo = FALSE, include = TRUE, results = 'asis'}
+
+# No fixed effects
+round_effects <- d[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID)]
+
+round_effects_cse <- sqrt(diag(vcovCL(round_effects, cluster = d$Prolific_Participant_ID)))
+
+# Fixed effects
+
+round_effects_fe <- d[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+round_effects_fe_lower <- d_lower[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+round_effects_fe_upper <- d_upper[ , lm(Treat_Recall ~ Font + Scrolling + Font:Scrolling + Baseline_Enjoy + Round_ID +
+                           Mobile_Device_Ind + Education_Level + Glasses_Contacts_Group +
+                           Resolution + as.factor(Age) + Sex)]
+
+round_effects_fe_cse <- sqrt(diag(vcovCL(round_effects_fe, cluster = d$Prolific_Participant_ID)))
+round_effects_fe_cse_lower <- sqrt(diag(vcovCL(round_effects_fe_lower, cluster = d$Prolific_Participant_ID)))
+round_effects_fe_cse_upper <- sqrt(diag(vcovCL(round_effects_fe_upper, cluster = d$Prolific_Participant_ID)))
+
+# Rename because of strange error (see https://stackoverflow.com/questions/74335392/stargazer-output-several-models-r/75095281#75095281)
+re_fe <- round_effects_fe
+re_fe_l <- round_effects_fe_lower
+re_fe_u <- round_effects_fe_upper
+
+summary_round                <- summary(round_effects)
+summary_round_fixed_effects  <- summary(round_effects_fe)
+summary_round_fixed_effects_lower  <- summary(round_effects_fe_lower)
+summary_round_fixed_effects_upper  <- summary(round_effects_fe_upper)
+
+
+p_round_values                   <- summary_round$coefficients[,"Pr(>|t|)"]
+p_round_font                     <- p_round_values["Font"]
+p_round_scrolling                <- p_round_values["Scrolling"]
+p_round_interaction              <- p_round_values["Font:Scrolling"]
+p_round_intercept                <- p_round_values["(Intercept)"]
+p_round_baseline                 <- p_round_values["Baseline_Enjoy"]
+p_round_2                        <- p_round_values["Round_ID2"]
+p_round_3                        <- p_round_values["Round_ID3"]
+p_round_4                        <- p_round_values["Round_ID4"]
+
+p_round_fixed_values             <- summary_round_fixed_effects$coefficients[,"Pr(>|t|)"]
+p_round_fixed_font               <- p_round_fixed_values["Font"]
+p_round_fixed_scrolling          <- p_round_fixed_values["Scrolling"]
+p_round_fixed_interaction        <- p_round_fixed_values["Font:Scrolling"]
+p_round_fixed_intercept          <- p_round_fixed_values["(Intercept)"]
+p_round_fixed_baseline           <- p_round_fixed_values["Baseline_Enjoy"]
+p_round_2_fixed                  <- p_round_values["Round_ID2"]
+p_round_3_fixed                  <- p_round_values["Round_ID3"]
+p_round_4_fixed                  <- p_round_values["Round_ID4"]
+
+p_round_fixed_values_lower       <- summary_round_fixed_effects_lower$coefficients[,"Pr(>|t|)"]
+p_round_fixed_font_lower         <- p_round_fixed_values_lower["Font"]
+p_round_fixed_scrolling_lower    <- p_round_fixed_values_lower["Scrolling"]
+p_round_fixed_interaction_lower  <- p_round_fixed_values_lower["Font:Scrolling"]
+p_round_fixed_intercept_lower    <- p_round_fixed_values_lower["(Intercept)"]
+p_round_fixed_baseline_lower     <- p_round_fixed_values_lower["Baseline_Enjoy"]
+p_round_2_fixed_lower            <- p_round_values["Round_ID2"]
+p_round_3_fixed_lower            <- p_round_values["Round_ID3"]
+p_round_4_fixed_lower            <- p_round_values["Round_ID4"]
+
+p_round_fixed_values_upper       <- summary_round_fixed_effects_upper$coefficients[,"Pr(>|t|)"]
+p_round_fixed_font_upper         <- p_round_fixed_values_upper["Font"]
+p_round_fixed_scrolling_upper    <- p_round_fixed_values_upper["Scrolling"]
+p_round_fixed_interaction_upper  <- p_round_fixed_values_upper["Font:Scrolling"]
+p_round_fixed_intercept_upper    <- p_round_fixed_values_upper["(Intercept)"]
+p_round_fixed_baseline_upper     <- p_round_fixed_values_upper["Baseline_Enjoy"]
+p_round_2_fixed_upper            <- p_round_values["Round_ID2"]
+p_round_3_fixed_upper            <- p_round_values["Round_ID3"]
+p_round_4_fixed_upper            <- p_round_values["Round_ID4"]
+
+
+
+vector_p_values_round <-c(p_round_font,p_round_scrolling,p_round_baseline,p_round_2,p_round_3,p_round_4,p_round_interaction,p_round_intercept,
+                          p_round_fixed_font,p_round_fixed_scrolling,p_round_fixed_baseline,p_round_2_fixed,p_round_3_fixed,p_round_4_fixed,p_round_fixed_interaction,p_round_fixed_intercept,
+                          p_round_fixed_font_lower,p_round_fixed_scrolling_lower,p_round_fixed_baseline_lower,p_round_2_fixed_lower,p_round_3_fixed_lower,p_round_4_fixed_lower,p_round_fixed_interaction_lower,p_round_fixed_intercept_lower,
+                          p_round_fixed_font_upper,p_round_fixed_scrolling_upper,p_round_fixed_baseline_upper,p_round_2_fixed_upper,p_round_3_fixed_upper,p_round_4_fixed_upper,p_round_fixed_interaction_upper,p_round_fixed_intercept_upper)
+
+
+BH_corrected_p_values_round <- p.adjust(vector_p_values_round, method = "BH")
+
+
+new_p_values_round               <- c(BH_corrected_p_values_round[1], BH_corrected_p_values_round[2], BH_corrected_p_values_round[3], BH_corrected_p_values_round[4], BH_corrected_p_values_round[5], BH_corrected_p_values_round[6], BH_corrected_p_values_round[7],  BH_corrected_p_values_round[8])
+
+new_p_values_round_fixed         <- c(BH_corrected_p_values_round[9], BH_corrected_p_values_round[10], BH_corrected_p_values_round[11], BH_corrected_p_values_round[12], BH_corrected_p_values_round[13], BH_corrected_p_values_round[14], BH_corrected_p_values_round[15],  BH_corrected_p_values_round[16])
+
+new_p_values_round_fixed_lower   <- c(BH_corrected_p_values_round[17], BH_corrected_p_values_round[18], BH_corrected_p_values_round[19], BH_corrected_p_values_round[20], BH_corrected_p_values_round[21], BH_corrected_p_values_round[22], BH_corrected_p_values_round[23],  BH_corrected_p_values_round[24])
+
+new_p_values_round_fixed_upper   <- c(BH_corrected_p_values_round[25], BH_corrected_p_values_round[26], BH_corrected_p_values_round[27], BH_corrected_p_values_round[28], BH_corrected_p_values_round[29], BH_corrected_p_values_round[30], BH_corrected_p_values_round[31],  BH_corrected_p_values_round[32])
+
+
+
+
+stargazer(round_effects, re_fe, re_fe_l, re_fe_u,
+          type = "latex", header = FALSE, dep.var.labels = c("Recall (Scored from 0-3)"),
+          title = "Round Effects Models (Recall Outcome)",
+          covariate.labels = c("Font", "Scrolling", "Baseline Enjoyment", "Second Round", "Third Round", "Fourth Round", "Font:Scrolling", "Constant"),
+          column.labels = c("Base Model", "Base Model + Covariates", "Lower Bound Imputation", "Upper Bound Imputation"),
+          omit = c("Mobile_Device_Ind", "Education_Level", "Glasses_Contacts_Group", "Resolution", "factor", "Sex"),
+          add.lines = list(c("Individual Fixed Effects", "No", "Yes", "Yes", "Yes")),
+          notes = c("Clustered standard errors in parentheses",
+                    "Statistical significance calculated using Benjamini-Hochberg-corrected p-values",
+                    "Individual Fixed Effects include: Mobile Device, Education Level, Glasses/Contacts Group, Screen Resolution, Age, and Sex"),
+          se=list(round_effects_cse, round_effects_fe_cse, round_effects_fe_cse_lower, round_effects_fe_cse_upper),
+          p = list(new_p_values_round, new_p_values_round_fixed, new_p_values_round_fixed_lower, new_p_values_round_fixed_upper),
+          style = "default",
+          font.size = "tiny",
+          column.sep.width = "1pt"
+          )
+
+```
+
+
+### Additional Qualitative Insights
+
+For additional insights on the drivers of our experimental results, we briefly analyzed the comments left by participants within the optional free-form questions at the end of our survey. A total of 169 unique participants left comments under one or both of these questions. We applied basic NLP preprocessing techniques to (A) construct two separate vocabularies corresponding to the comments data for the two free-form survey questions --- removing punctuation, numbers, and any English "stopwords" (as well as the unusually common words "read" and "reading" in participant responses based on our survey subject matter) along the way --- and (B) generate word clouds based on term frequencies within each vocabulary.\footnote{For a record of all 174 "stopwords" in the English language list, see the R documentation found here: https://rdrr.io/rforge/tm/man/stopwords.html.} A separate word cloud was generated for each of our two free-form survey questions.
+
+The resulting word clouds are shown in Figure 6. These visualizations allow us to quickly see which words most frequently appeared within participant comments, with word size denoting word frequency (i.e., larger size indicates higher frequency, smaller size indicates lower frequency). Notably, words like "scrolling", "scrolled", "pace", and "paced" appear in moderate to large size across both visuals, suggesting that our pacing treatment impacted participants' reading experiences to such a degree that it was frequently mentioned in survey comments. We also see similar pacing-related words like "fast", "faster", "speed", "quickly", "moved", "moving", and "control" appear in one or both visuals, which validates the presence of a main effect with forced-pacing. Additionally, both word clouds clearly feature words like "enjoy", "enjoyed", "text", "presented", and "experience", which supplies evidence that participants actually engaged with our intended experimental concepts and/or story design characteristics. Conversely, words like "font", "size", "big", and "small" appear to be either absent from or depicted in smaller-sized font across one or both visuals, suggesting that font size differences across the reading experiences didn't register as consistently impactful to participants' experiences (or, at least, not nearly as much as pacing differences did).
+
+These insights provide an additional layer of *qualitative* support for the conclusions drawn from our *quantitative* results. They corroborate the findings from our models and indicate that participant reading experiences were indeed *affected* by our treatment conditions. With additional time, we would take this analysis further by applying NLP sentiment classification techniques to investigate comment positivity/negativity (both alone and interacted with treatment condition and reading enjoyment data), which could help us determine if any of our treatments --- or any changes observed in enjoyment across rounds --- correlated with particular participant sentiments and feelings. 
+
+```{r word clouds for survey response comment data, warning = FALSE, include = FALSE}
+
+# Read in data from response influences comments as a data.table object
+text_response_influences_data <- data.table(
+  read_excel("Final_Experiment_Response_Influences_Text_Data-v10.12-09-2023.xlsx")
+  )
+
+# Read in data from all other open-ended comments as a data.table object
+text_other_comments_data      <- data.table(
+  read_excel("Final_Experiment_Other_Comments_Text_Data-v10.12-09-2023.xlsx")
+  )
+
+# Create vocabulary for response influences comments
+corpus_response_influences    <- Corpus(VectorSource(text_response_influences_data))
+
+# Preprocess vocabulary for response influences text
+# Note: Removes punctuation/numbers/stopwords and converts text to lowercase
+corpus_response_influences    <- tm_map(
+  corpus_response_influences, content_transformer(tolower))
+corpus_response_influences    <- tm_map(
+  corpus_response_influences, removePunctuation)
+corpus_response_influences    <- tm_map(
+  corpus_response_influences, removeNumbers)
+corpus_response_influences    <- tm_map(
+  corpus_response_influences, removeWords,
+  c(stopwords("english"), "reading", "read")
+  )
+
+# Create document-term matrix for response influences text vocabulary
+dtm_response_influences       <- DocumentTermMatrix(corpus_response_influences)
+
+# Convert document-term matrix for response influences text to a data frame
+word_freq_response_influences <- as.data.frame(as.matrix(dtm_response_influences))
+
+# Sum word frequencies in data frame for response influences text
+word_freq_response_influences <- colSums(word_freq_response_influences)
+
+# Create a word cloud for response influences text
+wordcloud_response_influences <- wordcloud2(
+  data = data.frame(
+    word = names(word_freq_response_influences),
+    freq = word_freq_response_influences
+    )
+  )
+
+# Create vocabulary for other comments
+corpus_other_comments         <- Corpus(VectorSource(text_other_comments_data))
+
+# Preprocess vocabulary for other comments text
+# Note: Removes punctuation/numbers/stopwords and converts text to lowercase
+corpus_other_comments         <- tm_map(
+  corpus_other_comments, content_transformer(tolower))
+corpus_other_comments         <- tm_map(
+  corpus_other_comments, removePunctuation)
+corpus_other_comments         <- tm_map(
+  corpus_other_comments, removeNumbers)
+corpus_other_comments         <- tm_map(
+  corpus_other_comments, removeWords,
+  c(stopwords("english"), "reading", "read")
+  )
+
+# Create document-term matrix for other comments text vocabulary
+dtm_other_comments            <- DocumentTermMatrix(corpus_other_comments)
+
+# Convert document-term matrix for other comments text to a data frame
+word_freq_other_comments      <- as.data.frame(as.matrix(dtm_other_comments))
+
+# Sum word frequencies in data frame for other comments text
+word_freq_other_comments      <- colSums(word_freq_other_comments)
+
+# Create a word cloud for other comments text
+wordcloud_other_comments      <- wordcloud2(
+  data = data.frame(
+    word = names(word_freq_other_comments),
+    freq = word_freq_other_comments
+    )
+  )
+
+# Display 1st word cloud
+wordcloud_response_influences
+
+# Display 2nd word cloud
+wordcloud_other_comments
+
+```
+
+```{r create figure 6: participant comment word clouds, include = TRUE, echo = FALSE, fig.cap = 'Word Cloud visualizations of most frequent words in participant survey comments: response influences (left) and other comments (right); note: common English stopwords are excluded, along with the words "read" and "reading"', out.height = "30%", fig.align = 'center'}
+
+# Create figure 6
+fig6 <- knitr::include_graphics("Participant_Comments_Word_Clouds_Diagram.png")
+
+# Display figure 6
+fig6
+
+```
+
+
+# Conclusion
+
+Our experimental results lead to separate conclusions for our outcome measures of interest. First, with respect to *reading enjoyment*, we ultimately reject our null hypothesis and the directionality of effects posed in our alternative hypothesis. We find that, as a whole, some of our treatments have statistically significant negative main effects on enjoyment at a level that is also of practical significance. Specifically, we conclude that forced-pacing (scrolling) has the largest impact on enjoyment at statistically significant levels, even after applying EVB analysis to account for participant attrition. We also find that statistically significant negative round effects exist for the third and fourth rounds of treatment, which is suggestive of participant fatigue or persistence effects from previous (i.e., first or second round) treatment conditions.
+
+Second, with respect to *fact recall*, we fail to reject our null hypothesis. We find no statistically significant or practically significant main effects, interaction effects, or round effects on recall for our treatment conditions. 
+
+To build on our findings, future research could test whether our observed effects manifest across additional reading mediums --- such as paper textbooks and audio books --- and/or additional variations of font size, font color, stylistic/formatting details, or forced-pacing conditions (e.g., larger font, *slower* pacing). Additionally, we wonder if the incorporation of a "progress bar" (a visual/feature that explicitly indicates advancement toward a goal) within any of the reading experiences we presented might lead to different results, especially when testing larger font sizes. Finally, we suggest future studies explore the link between forced-pacing and reading comprehension, moving beyond the basic measurement of fact recall we employed within our research.
+
+A key implication of our findings is this: allowing readers the autonomy to choose the pace at which they read and giving them the ability to adjust the font size of their reading material plays an important role in the reading experience. In fact, when this "control" is stripped away, we see meaningful impacts to reading enjoyment. Practically, this result holds importance for educators, reading instructors, and companies that design digital reading tools or products for the general population. In light of our findings, each of these groups can be increasingly cognizant of how the design features within a created or administered reading experience affects reader enjoyment --- either for the better, or for the worse.
+
+\newpage
+
+# Appendix: ChatGPT-Generated Stories & Qualtrics Survey Link
+
+## Story A: The Last Voyage of the Space Explorer
+
+Captain Adrian Rourke gazed through the large, transparent viewport of his spacecraft, the "Stardancer," as it hurtled through the endless expanse of space. At the ripe age of 72, he was embarking on his final voyage, determined to unlock the mysteries of a cosmic anomaly known as the "Eternal Halo."
+
+The stars twinkled like a sea of diamonds, and the distant glow of the Eternal Halo beckoned him closer. Decades of exploration had led him to this very moment, and despite the physical toll his body had endured, his spirit burned with an unquenchable thirst for knowledge.
+
+Adrian couldn't help but feel the weight of his age and the realization that this might be his last journey. He thought about the years of wonder and discovery, the adventures and the solitude. A sense of nostalgia enveloped him as he considered the path he had chosen.
+
+The ship's computer, an AI named LARA, chimed in. "Captain Rourke, we are approaching the Eternal Halo's event horizon. Scans indicate increased gravitational forces and intense radiation."
+
+Adrian nodded, his rugged face showing a hint of weariness. "Prepare for entry, LARA. This is it."
+
+As the "Stardancer" passed through the shimmering boundary of the anomaly, the laws of physics seemed to distort. Time became fluid, and space stretched and contracted. The past and future danced in an intricate waltz, and for a moment, Adrian felt as though he had glimpsed the very essence of the cosmos.
+
+With each passing moment in the heart of the Eternal Halo, Adrian's mind oscillated between the wonder of the unknown and the longing for the familiar. He couldn't help but think of the countless nights he had spent gazing at the stars, yearning to understand their mysteries.
+
+He couldn't help but reflect on the life he had led. The countless planets he had visited, the discoveries he had made, and the sacrifices he had endured. He thought of his beloved wife, Elena, who had left him all those years ago, unable to bear the weight of his insatiable curiosity.
+
+LARA's voice broke his reverie. "Captain, we have reached the core of the Eternal Halo. Sensors indicate a profound source of energy. Should I initiate data collection?"
+
+Adrian's heart swelled with anticipation. "Yes, LARA, it's time to uncover the secrets of the universe."
+
+As the "Stardancer" began its data collection process, an intense surge of energy pulsed through the ship. Adrian watched in awe as the console before him displayed readings that defied comprehension. The knowledge contained within this anomaly was beyond anything he had ever encountered.
+
+But as he delved deeper into the cosmic enigma, he couldn't help but feel a sense of closure. He had lived a life devoted to exploration, but it had come at a cost. The years spent away from his family, the sacrifices made in the name of discovery—all had led him to this moment.
+
+With the data collection complete, Adrian knew that his journey was over. The "Stardancer" began its journey back to the familiar realms of space. He couldn't help but smile as he thought of the generations of explorers who would benefit from the knowledge he had gathered.
+
+As the spacecraft left the Eternal Halo behind, Captain Adrian Rourke felt a profound sense of fulfillment. He had lived a life of purpose and curiosity, and now, it was time to return to the people and places he had left behind.
+
+For even in the vastness of space, there was a universal truth that he had rediscovered—exploration was not merely a quest for the unknown, but a journey toward understanding and connection, and that journey could lead one back home.
+
+As the "Stardancer" neared Earth, a sense of peace washed over him. He looked forward to reuniting with his family, sharing the wisdom he had gained, and finally experiencing the quiet moments that he had sacrificed for the call of the cosmos. His final voyage had brought him full circle, from the depths of space to the warmth of home, reminding him that the greatest discoveries were often found in the simplest of connections.
+
+
+## Story B: The Library of Lost Stories
+
+Eleanor had always been an unassuming librarian in the small town of Willowbrook. Her life was quiet, and her days were filled with the hushed whispers of the town's avid readers. She had a fondness for books, old and new, and her library was a sanctuary of stories waiting to be explored.
+
+One chilly autumn evening, as Eleanor was shelving books in the back of the library, she discovered a hidden door tucked away behind a dusty bookshelf. Curiosity piqued, she turned the tarnished brass handle, and the door creaked open to reveal a dimly lit room.
+
+Before her lay a vast and dusty library, unlike anything she had ever seen. The shelves were lined with leather-bound tomes, each one bearing a unique title: "The Unfinished Symphony," "The Vanishing Moon," "The Forgotten Promise," and countless others. These were not ordinary books; they were the Library of Lost Stories.
+
+Eleanor's fingers trembled as she pulled one of the books from the shelf. The pages crackled with age, and as she opened it, words flowed across the pages, forming a story that had never been told. The words seemed to come to life, painting vivid scenes and compelling characters.
+
+She spent hours reading, completely entranced by the stories that had been hidden from the world. Each book contained tales of love, adventure, and mystery, and Eleanor felt like she had discovered a hidden treasure trove of the human imagination.
+
+As days turned into weeks, Eleanor dedicated herself to cataloging the books and reading each one cover to cover. She realized that these were stories that had been started but never finished, dreams that had been abandoned by their creators. Now, they had found their way to her.
+
+One day, while reading a story about a brave young explorer searching for a lost city in the Amazon, Eleanor was struck by an idea. She would complete these stories, breathe life into them, and share them with the world. She would become the guardian of the Library of Lost Stories.
+
+Her determination knew no bounds. She spent countless hours writing, editing, and revising the tales within the library. The characters that had been left in limbo now had their destinies fulfilled, and the stories were brought to completion.
+
+With each story she finished, a sense of fulfillment washed over her. She felt like she was giving a voice to the forgotten characters, allowing their adventures to be told. And with each completed story, the shelves of the library seemed to shine a bit brighter.
+
+Word of Eleanor's mission began to spread throughout Willowbrook. People from the town and neighboring areas came to read the newly finished stories and marvel at the extraordinary library. It became a place of inspiration and wonder, where the dreams of authors long gone were given new life.
+
+One afternoon, a young woman named Emma approached Eleanor with a timid request. She had started writing a novel but had lost her inspiration and didn't know how to finish it. Eleanor, who had found her own inspiration in the Library of Lost Stories, welcomed Emma and introduced her to the hidden world of unfinished tales.
+
+Together, they embarked on a journey to complete Emma's novel, and as they breathed life into her characters and story, a strong bond formed between them. Eleanor's mission had not only given new life to forgotten stories but also connected her with people in search of their own creative voices.
+
+As the years passed, Eleanor's hair turned silver, but her spirit remained as youthful as ever. The Library of Lost Stories had grown, and its shelves held tales from every corner of the world. Eleanor's library had become a hub of creativity and connection, where the boundaries between readers, writers, and the stories themselves blurred.
+
+And so, Eleanor, the unassuming librarian of Willowbrook, had transformed her quiet life into a vibrant tapestry of stories, where the lost had been found, and the forgotten had been remembered. In the Library of Lost Stories, words had found their way home, and in Eleanor's heart, a new chapter of her own story had begun.
+
+
+## Story C: The Quantum Photograph
+
+In the heart of the bustling city of New York, where the relentless energy of life never seemed to fade, lived a scientist named Dr. Evelyn Reynolds. She had dedicated her life to the study of quantum physics, a field that both fascinated and challenged her intellect. 
+
+One day, while rummaging through a dusty thrift shop, Evelyn discovered an antique camera unlike any she had ever seen. The shopkeeper told her it was a "Quantum Camera" and that it had once belonged to a renowned scientist.
+
+Intrigued, Evelyn purchased the camera and brought it back to her small, cluttered apartment. She studied the camera's intricacies, noting its delicate brass dials and the peculiar glass lens. A handwritten note tucked into the camera's leather case piqued her curiosity further. It read, "Capture the invisible."
+
+Evelyn, always eager for a scientific challenge, decided to experiment with the camera. She took it to her lab, set up a controlled environment, and captured her first photograph. To her amazement, the image revealed a strange, glowing aura surrounding an everyday object.
+
+Word of Evelyn's discovery spread throughout the scientific community, and she was soon invited to present her findings at a prestigious conference. The audience of brilliant minds marveled at her breakthroughs in capturing the unseen.
+
+But Evelyn wasn't satisfied. She realized that her camera could do more than just capture these invisible forces; it could provide a window into alternate realities. She had a vision of using the Quantum Camera to peer into parallel universes, to see the choices and paths not taken.
+
+Late one night in her lab, Evelyn set up the camera for an audacious experiment. She aimed it at a photograph of herself from years ago, a pivotal moment when she had chosen one career path over another. With a click, the camera's shutter snapped, and the image developed before her eyes.
+
+To her astonishment, the photograph revealed an alternate version of herself, a scientist who had pursued a different path, living a life of adventure and discovery. It was as if the Quantum Camera had torn a hole in the fabric of reality and given her a glimpse into a parallel universe.
+
+Evelyn was both thrilled and haunted by what she had witnessed. The possibilities were endless, and the temptation to explore these alternate realities grew stronger with each passing day. She became obsessed, spending sleepless nights perfecting her experiments.
+
+As Evelyn delved deeper into the mysteries of the Quantum Camera, she found herself navigating a maze of branching timelines, each with its own set of choices and consequences. The camera had unlocked a Pandora's box of endless possibilities, and Evelyn was consumed by the desire to explore them all.
+
+One day, as she prepared to take another journey into the unknown, Evelyn noticed the note in the camera's leather case once more. "Capture the invisible," it read. The words took on a new meaning for her. She realized that the most precious and invisible thing of all was the life she had chosen, the path she had taken, and the reality she had created.
+
+With a heavy heart, Evelyn made a decision. She turned off the Quantum Camera and locked it away in a vault, vowing never to use it again. She had come to understand that the pursuit of infinite possibilities had blinded her to the beauty of the reality she had chosen.
+
+Evelyn returned to her life as a scientist in the bustling city of New York. She cherished each moment, each decision, and each consequence as a unique and precious part of her own reality. She had learned that it was not the endless choices that gave life meaning, but the choices themselves, and the journey that came with them.
+
+
+## Story D: The Enchanted Garden 
+
+Once upon a time, in a small cottage nestled at the edge of a dense forest, lived a young girl named Emily. Her family had recently moved to this tranquil place, hoping for a fresh start. As Emily explored her new surroundings, she discovered a hidden, overgrown garden tucked away behind the cottage.
+
+The garden was unlike any she had seen before. Vibrant flowers of every color imaginable, towering trees with leaves that seemed to whisper secrets, and a pond with water so clear it mirrored the sky. The air was filled with the enchanting scent of blossoms, and the garden itself was overgrown with ivy and wildflowers.
+
+As Emily ventured deeper into the garden, she noticed something unusual. The plants and creatures within seemed to come to life in her presence. The flowers turned to face her, and the birds sang melodies that filled her heart with joy. It was as though the garden itself recognized her as its new caretaker.
+
+Emily spent her days tending to the garden, caring for the plants and conversing with the animals. She soon discovered that each flower and creature held a story to tell, a secret from the past. The roses whispered of love stories, the oak tree had witnessed ancient battles, and the fish in the pond knew of long-forgotten legends.
+
+One day, as Emily was pruning a rosebush, she uncovered a hidden stone path that led to a magnificent gazebo at the heart of the garden. In the center of the gazebo stood a peculiar, ornate keyhole. With a sense of curiosity, she began her quest to find the key that would unlock its mysteries.
+
+The garden, sensing Emily's desire, guided her on her journey. Each day, she would explore a different part of the garden, and with each new discovery, she would get a little closer to finding the elusive key. She met a wise old tortoise who shared riddles and a mischievous squirrel that led her to hidden clues. Every plant and creature was eager to help her unravel the garden's secrets.
+
+As Emily ventured deeper into the garden's mysteries, she encountered a magical fountain. The fountain's waters shimmered with an otherworldly light, and it spoke to her in a gentle, melodic voice. It told her that the key to the gazebo lay not in a physical form, but in the experiences and stories she collected from the garden.
+
+Emily understood. The key to the gazebo was not a physical object; it was the wisdom, love, and wonder she had gained from her time spent in the garden. Over time, she learned about love, bravery, friendship, and the beauty of the world around her.
+
+Finally, after what felt like a lifetime of exploration, Emily stood before the gazebo once more. As she approached, the keyhole began to glow with a soft, warm light. She touched the keyhole, and it opened, revealing the enchanting wonders of the gazebo.
+
+Inside, she found a magical book filled with the stories of the garden, written in words that seemed to dance on the pages. It was a treasure trove of the enchanting tales and secrets the garden had shared with her. As she read the stories, she felt a deep connection to the garden and the living things within.
+
+Emily realized that the true enchantment of the garden was not just in its physical beauty but in the stories and wisdom it held. She continued to care for the garden, sharing its stories with her family and the world. The garden, now even more vibrant and alive, flourished under her care.
+
+Years passed, and Emily grew into a wise, kind-hearted woman. The enchanted garden became a place of wonder, where people from all walks of life could visit to find solace, learn the wisdom of the natural world, and hear the stories of the flowers and creatures within.
+
+And in the heart of the garden, the gazebo stood as a symbol of the magic that could be found when one listens to the world around them and cherishes the stories it has to share.
