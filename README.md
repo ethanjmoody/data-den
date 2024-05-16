@@ -12,7 +12,7 @@ This repository showcases a diverse range of projects spanning different domains
 
 Each project includes comprehensive code, notes on key findings, and visualizations to demonstrate my approach and results. Feel free to explore and reach out with any questions or collaboration opportunities.
 
-## Featured Projects
+## Main Quests: Featured Projects
 
 Project materials reside in `individual folders`, labeled by project name. Below are brief descriptions of each featured project, along with the skills and tools used to develop them:
 
@@ -64,6 +64,6 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Explored necessary assumptions for t-tests and both the statistical and practical significance of findings.
 - Highlighted skills and tools: R (analysis/modeling), hypothesis testing (t-test), data cleaning, R Markdown (paper writing).
 
-## Side Quests
+## Side Quests: Quick Analyses
 
-Additional examples of code, exploratory work, and general miscellany – not of the same caliber as project work – are stored in a separate `playground` folder. This is by no means off-limits, so explore away if you'd like.
+Additional examples of code, exploratory work, and quick analyses – not of the same caliber as project work – are stored in a separate `playground` folder. This folder is by no means off-limits, so explore away if you'd like.
