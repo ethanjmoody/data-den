@@ -60,7 +60,7 @@ Project materials reside in `individual folders`, labeled by project name. Below
 
 :us: **Measuring Voting Difficulty in the 2020 U.S. Presidential Election**
 - Analyzed voting challenges experienced by Democratic (D) and Republican (R) voters based on ANES data. 
-- Evaluated the hypothesis that (D) and (R) voters experienced the same level of difficulty when voting.
+- Rejected the hypothesis that (D) and (R) voters experienced the same level of difficulty when voting.
 - Explored necessary assumptions for t-tests and both the statistical and practical significance of findings.
 - Highlighted skills and tools: R (analysis/modeling), hypothesis testing (t-test), data cleaning, R Markdown (paper writing).
 
