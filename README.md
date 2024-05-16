@@ -28,6 +28,12 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Built linear regressions of increasing complexity, and summarized findings/limitations in a scientific paper.
 - Highlighted skills and tools: Qualtrics (survey and data collection), R (analysis/modeling), linear regressions, power analysis with randomization inference, Extreme Value Bounds (EVB) and attrition analysis, R Markdown (paper writing).
 
+:page_with_curl: **Unmasking the Limitations of a Recent COVID-19 Study and Evaluating Causal Claims**
+- Responded to a study on COVID-19 school masking, evaluating the assumptions behind the study's claims.
+- Summarized study's conclusions and offered an argument against causality based on the chosen design.
+- Posited characteristics of an "ideal", alternative experiment that could better support the study's claims.
+- Highlighted skills and tools: Logic and reasoning, critical thinking, understanding of experimental design, R Markdown (paper writing).
+
 :classical_building: **Unveiling Complex Interconnections Among Companies through Learned Embeddings**
 - Explored alternative methods of stock sector classification using learned embeddings and graph clustering.
 - Summarized Form 10-K text data and trained six classification models to explore company relationships.
@@ -40,17 +46,23 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Applied insights from EDA and HP tuning to achieve 96% accuracy and 92% recall on hold-out (test) set.
 - Highlighted skills and tools: Python, Scikit-learn/TensorFlow (data preprocessing and modeling), Shapley (model interpretation and feature importance), class imbalance handling (SMOTE/class reweighting).
 
+:takeout_box: **Advising a Gourmet Meals Startup Business**
+- Created SQL queries to provide insights to customer-, sales-, and meal-related business questions.
+- Used Neo4j and graph algorithms to develop recommendations for business strategy and expansion.
+- Provided an overview of NoSQL database/tool options (e.g., MongoDB, Redis) for the business to consider.
+- Highlighted skills and tools: Python, SQL (Postgres), Neo4j, nested JSON parsing, business analysis, recommendation development.
+
 :moneybag: **Estimating Key Drivers of Peer-to-Peer Loan Interest Rates**
 - Fitted three linear models to predict interest rates for a specific segment of consumer microloans.
 - Identified statistical and practical significance for several predictors, and summarized results in a paper.
 - Presented important considerations around model interpretability, bias, and business/customer trade-offs.
 - Highlighted skills and tools: R (analysis/modeling), statistical goodness of fit testing, linear regressions, R Markdown (paper writing).
 
-:page_with_curl: **Unmasking the Limitations of a Recent COVID-19 Study and Evaluating Causal Claims**
-- Responded to a study on COVID-19 school masking, evaluating the assumptions behind the study's claims.
-- Summarized study's conclusions and offered an argument against causality based on the chosen design.
-- Posited characteristics of an "ideal", alternative experiment that could better support the study's claims.
-- Highlighted skills and tools: Logic and reasoning, critical thinking, understanding of experimental design, R Markdown (paper writing).
+:us: **Measuring Voting Difficulty in the 2020 U.S. Presidential Election**
+- Analyzed voting challenges experienced by Democratic (D) and Republican (R) voters based on ANES data. 
+- Evaluated the hypothesis that (D) and (R) voters experienced the same level of difficulty when voting.
+- Explored necessary assumptions for t-tests and both the statistical and practical significance of findings.
+- Highlighted skills and tools: R (analysis/modeling), hypothesis testing (t-test), data cleaning, R Markdown (paper writing).
 
 ## Side Quests
 
