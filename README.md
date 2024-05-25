@@ -66,4 +66,4 @@ Project materials reside in `individual folders`, labeled by project name. Below
 
 ## Side Quests: Quick Analyses
 
-Additional examples of code, exploratory work, and quick analyses – not of the same caliber as project work – are stored in a separate `playground` folder. This folder is by no means off-limits, so explore away if you'd like.
+Additional examples of code, exploratory work, and quick analyses – not of the same rigor or depth as project work – are stored in a separate `playground` folder. This folder is by no means off-limits, so explore away if you'd like.
