@@ -2,7 +2,7 @@
 
 Welcome to my data science portfolio! :wave:
 
-This repository showcases a diverse range of projects spanning different domains and personal areas of interest. Some of these projects were individual undertakings; others were the result of group efforts. Here, you'll find examples of:
+This repository showcases a diverse range of projects spanning different domains and personal areas of interest. Some of these projects were individual undertakings; others were the result of group efforts (with co-authors noted). Here, you'll find examples of:
 
 - :robot: **Machine Learning & Modeling**: Projects demonstrating predictive modeling and algorithm development.
 - :test_tube: **Causal Inference**: Insights drawn from designing and interpreting experiments to infer causality.
