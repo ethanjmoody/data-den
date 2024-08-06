@@ -21,7 +21,7 @@ Others (Non-Badged): Google Sites, Qdrant, Stable Diffusion 3, Whisper
 
 Project materials reside in `individual folders`, labeled by project name. Below are brief descriptions of each featured project, along with the skills and tools used to develop them:
 
-:student: **EduCreate: GenAI-Assistive Personalized Learning Solutions through Comics, Summaries, and Lesson Plans**
+:student: **EduCreate: GenAI-Assistive Personalized Educational Solutions**
 - Details to come...
 
 :mag: **From RAGs to Riches: How Search and Q&A Capabilities with RAG can Accelerate E&M Workflows**
