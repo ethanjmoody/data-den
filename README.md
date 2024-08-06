@@ -7,7 +7,7 @@ This repository showcases a diverse range of projects spanning different domains
 - :robot: **Machine Learning & Modeling**: Projects demonstrating predictive modeling and algorithm development.
 - :test_tube: **Causal Inference**: Insights drawn from designing and interpreting experiments to infer causality.
 - :bar_chart: **Applied Statistics**: Applications of statistical methods to explore data and drive decisions.
-- :speech_balloon: **NLP and GenAI**: Explorations of language models, information retrieval, and response generation.
+- :speech_balloon: **NLP and GenAI**: Explorations of language and text-to-image models, info retrieval, and response generation.
 - :writing_hand: **Scientific & Technical Writing**: Papers written to explain project findings and their practical significance.
 
 Each project includes comprehensive code, notes on key findings, and visualizations to demonstrate my approach and results. Feel free to explore and reach out with any questions or collaboration opportunities.
