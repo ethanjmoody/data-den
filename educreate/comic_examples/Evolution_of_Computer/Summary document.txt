@@ -1,0 +1,32 @@
+Main lesson objective: Explain how the computer was invented and how it evolved and advanced from its first days to where it was the end of the twentieth century.
+
+Here's a summary of key milestones in computer development from its invention to the end of the 20th century:
+
+1. 1940s: First electronic computers
+- ENIAC (1946): First general-purpose electronic computer
+- Manchester Baby (1948): First stored-program computer
+
+2. 1950s: Transistors and programming languages
+- Transistors replace vacuum tubes, making computers smaller and more reliable
+- FORTRAN (1957): First high-level programming language
+
+3. 1960s: Minicomputers and time-sharing
+- DEC PDP-8 (1965): First successful minicomputer
+- UNIX operating system (1969): Enables time-sharing and multitasking
+
+4. 1970s: Microprocessors and personal computers
+- Intel 4004 (1971): First commercial microprocessor
+- Altair 8800 (1975): First personal computer kit
+- Apple II (1977): First mass-produced personal computer
+
+5. 1980s: Graphical User Interfaces (GUI) and networking
+- IBM PC (1981): Sets industry standard for personal computers
+- Apple Macintosh (1984): Introduces GUI to mainstream users
+- Internet becomes more widely accessible
+
+6. 1990s: World Wide Web and mobile computing
+- World Wide Web (1990): Created by Tim Berners-Lee
+- Windows 95 (1995): Brings GUI to millions of PC users
+- Google search engine (1998): Revolutionizes information access
+
+These advancements dramatically increased computing power, reduced size and cost, improved user-friendliness, and expanded the applications of computers in business, science, and everyday life. By the end of the 20th century, computers had become an integral part of modern society, setting the stage for the digital age of the 21st century.

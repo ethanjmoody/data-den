@@ -1,0 +1,19 @@
+Main lesson objective: Give a brief overview of the events that led to Albert Einstein's general theory of relativity.
+
+The formulation of Albert Einstein's general theory of relativity in 1915 was built upon several key developments and scientific discoveries from earlier physicists. Here are the essential points and historical context:
+
+1. **Newtonian Mechanics**: Isaac Newton's laws of motion and universal gravitation (1687) laid the groundwork for classical physics. Newton described gravity as a force acting at a distance, which was fundamental in understanding celestial mechanics.
+
+2. **Electromagnetism**: James Clerk Maxwell's equations (1860s) unified electricity and magnetism, demonstrating that light is an electromagnetic wave. This work influenced Einstein's thinking about the nature of light and its relationship with space and time.
+
+3. **Special Relativity**: In 1905, Einstein published his special theory of relativity, which introduced the concepts of time dilation and length contraction. This theory established that the laws of physics are the same for all observers in uniform motion and that the speed of light is constant in a vacuum, regardless of the observer's motion.
+
+4. **Riemannian Geometry**: The mathematical framework for general relativity was influenced by the work of mathematicians such as Bernhard Riemann, who developed non-Euclidean geometry. This allowed Einstein to describe gravity not as a force but as the curvature of spacetime caused by mass.
+
+5. **Equivalence Principle**: Einstein proposed the equivalence principle, which posits that the effects of gravity are locally indistinguishable from acceleration. This idea was crucial for understanding how mass affects the geometry of spacetime.
+
+6. **Experimental Evidence**: Several experiments provided evidence that supported Einstein's theories. For instance, the observation of the bending of light around massive objects, confirmed during the solar eclipse of 1919 by Arthur Eddington, provided strong support for general relativity. This experiment demonstrated that light follows the curvature of spacetime around the sun.
+
+7. **Gravitational Waves**: Although predicted by Einstein's equations, gravitational waves were not directly observed until 2015. Their detection by LIGO confirmed another aspect of general relativity and showcased the dynamic nature of spacetime.
+
+These developments collectively contributed to a revolutionary understanding of gravity and the structure of the universe, marking a significant shift from classical to modern physics.

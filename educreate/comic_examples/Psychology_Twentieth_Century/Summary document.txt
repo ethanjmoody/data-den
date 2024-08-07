@@ -1,0 +1,13 @@
+Main lesson objective: Outline the most significant competing views of psychology throughout the twentieth century.
+
+During the twentieth century, several key schools of thought emerged in psychology, each contributing unique principles and perspectives to the understanding of human behavior and mental processes.
+
+1. **Behaviorism**: Founded by John B. Watson and later advanced by B.F. Skinner, behaviorism focuses on observable behaviors rather than internal mental states. It posits that all behaviors are learned through interaction with the environment, emphasizing the role of reinforcement and punishment in shaping behavior. Behaviorism significantly contributed to experimental psychology and the development of techniques such as behavior modification.
+
+2. **Psychoanalysis**: Developed by Sigmund Freud, psychoanalysis emphasizes the influence of the unconscious mind on behavior. Freud introduced concepts such as the id, ego, and superego, as well as defense mechanisms and the importance of childhood experiences in shaping personality. This school of thought laid the groundwork for understanding mental disorders and introduced therapeutic techniques like free association and dream analysis.
+
+3. **Humanistic Psychology**: In response to the deterministic views of behaviorism and psychoanalysis, humanistic psychology emerged in the 1950s, with key figures like Carl Rogers and Abraham Maslow. This approach emphasizes individual potential, self-actualization, and personal growth. Humanistic psychologists advocate for a holistic view of human beings, focusing on subjective experiences and the importance of empathy and unconditional positive regard in therapy.
+
+4. **Cognitive Psychology**: Gaining prominence in the 1960s, cognitive psychology focuses on mental processes such as perception, memory, and problem-solving. Pioneers like Jean Piaget and Ulric Neisser explored how people understand and interact with the world. This school of thought has contributed to the development of cognitive-behavioral therapy (CBT) and has influenced various fields, including education and artificial intelligence.
+
+Each of these schools has shaped the landscape of psychology, providing diverse frameworks for understanding human thought and behavior, and influencing therapeutic practices and research methodologies.

@@ -1,0 +1,21 @@
+Main lesson objective: Describe the key events that led to the Financial Crisis of 2008 from the perspective of a mortgage lender.
+
+The 2008 Financial Crisis was primarily driven by a combination of risky mortgage lending practices, regulatory failures, and market conditions. Here are the major events and factors that contributed to the crisis from the mortgage lending perspective:
+
+1. **Subprime Mortgage Lending**: In the early 2000s, lenders began offering subprime mortgages to borrowers with poor credit histories. These loans often featured adjustable-rate mortgages (ARMs) with low initial rates that would reset to much higher rates after a few years, making them unaffordable for many borrowers.
+
+2. **Housing Bubble**: The U.S. housing market experienced a significant boom, with home prices rising rapidly. This was fueled by easy credit, speculative buying, and the belief that housing prices would continue to rise indefinitely. Many borrowers took out loans they could not afford, believing they could refinance or sell at a profit.
+
+3. **Mortgage-Backed Securities (MBS)**: Financial institutions began bundling these risky mortgages into mortgage-backed securities and selling them to investors. This process spread the risk throughout the financial system, creating a false sense of security about the safety of these investments.
+
+4. **Credit Rating Agencies**: Credit rating agencies assigned high ratings to many of these mortgage-backed securities, despite their underlying risk. This misled investors into believing they were purchasing safe investments, further fueling demand for subprime mortgages.
+
+5. **Deregulation**: The financial industry underwent significant deregulation in the years leading up to the crisis, including the repeal of the Glass-Steagall Act, which had previously separated commercial and investment banking. This allowed banks to engage in riskier lending practices without adequate oversight.
+
+6. **Predatory Lending Practices**: Many lenders engaged in predatory lending practices, targeting vulnerable borrowers with high-interest loans and hidden fees. This often led to borrowers being trapped in cycles of debt.
+
+7. **Rising Default Rates**: As interest rates on adjustable-rate mortgages reset to higher levels, many borrowers began to default on their loans. This led to a surge in foreclosures, which further depressed housing prices and created a downward spiral in the housing market.
+
+8. **Financial Institution Failures**: Major financial institutions, such as Lehman Brothers, faced insolvency due to their exposure to toxic mortgage-backed securities. The collapse of Lehman Brothers in September 2008 marked a critical moment in the crisis, leading to widespread panic in the financial markets.
+
+9. **Government Response**: In response to the crisis, the U.S. government implemented several measures, including
