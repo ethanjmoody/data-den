@@ -22,7 +22,12 @@ Others (Non-Badged): Google Sites, Qdrant, Stable Diffusion 3, Whisper
 Project materials reside in `individual folders`, labeled by project name. Below are brief descriptions of each featured project, along with the skills and tools used to develop them:
 
 :student: **EduCreate: GenAI-Assistive Personalized Educational Solutions**
-- Details to come...
+- Project managed the build of an open-source app framework that creates personalized educational content using GenAI.
+- Designed and built a Google Sites webpage to allow for public access to the tool, hosted on Streamlit.
+- Incorporated LLMs, RAG, text-to-image, and sound-to-text models to generate:
+    * Comic strips and text summaries based on reference text material and specified lesson objectives
+    * Lesson plans based on reference audio/video material and specified lesson objectives
+- Highlighted skills and tools: Python, multiple GenAI models (e.g., Anthropic Claude 3.5 Sonnet, OpenAI GPT 4o Mini, Stability AI Stable Diffusion 3, OpenAI Whisper-1), presentation design, website creation, product development.
 
 :mag: **From RAGs to Riches: How Search and Q&A Capabilities with RAG can Accelerate E&M Workflows**
 - Implemented a Retrieval-Augmented Generation (RAG) system to generate answers to NLP/GenAI questions.
