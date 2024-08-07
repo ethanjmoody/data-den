@@ -223,6 +223,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 * [othneildrew's Awesome Readme Template](https://github.com/othneildrew/Best-README-Template)
 * [React Icons](https://react-icons.github.io/react-icons/search)
+* [Official EduCreate GitHub Repo](https://github.com/ykinakin/educreate/tree/main)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
