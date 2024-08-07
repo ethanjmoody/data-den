@@ -24,7 +24,7 @@ Project materials reside in `individual folders`, labeled by project name. Below
 :student: **EduCreate: GenAI-Assistive Personalized Educational Solutions**
 - Project managed the build of an open-source app framework that creates educational content using GenAI.
 - Designed and built a Google Sites webpage to allow for public access to the tool, hosted on Streamlit.
-    * Tool currently focuses on history subject material (e.g., ancient Greek/Roman and 20th century world history)
+    * Tool currently focuses on history subject material (e.g., ancient history and 20th century history)
     * Link to website: https://sites.google.com/view/educreate-com/
 - Incorporated LLMs, RAG, text-to-image, and sound-to-text models to generate:
     * Comic strips and text summaries based on reference text material and specified lesson objectives
