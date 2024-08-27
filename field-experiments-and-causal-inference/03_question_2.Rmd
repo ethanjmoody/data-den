@@ -1,0 +1,135 @@
+# Noncompliance in Recycling Experiment 
+
+```{problem_description}
+Suppose that you want to conduct a study of recycling behavior. A number of undergraduate students are hired to walk door to door and provide information about the benefits of recycling to people in the treatment group. Here are some facts about how the experiment was actually carried out.  
+
+- 1,500 households are assigned to the treatment group. 
+- The undergrads tell you that they successfully managed to contact 700 households. 
+- The control group had 3,000 households (not contacted by any undergraduate students). 
+- The subsequent recycling rates (i.e. the outcome variable) are computed and you find that 500 households in the treatment group recycled. In the control group, 600 households recycled.
+```
+
+## Intent to treat effect
+What is the ITT? Do the work to compute it, and store it into the object `recycling_itt`.  Provide a short narrative using inline R code, such as `r inline_reference`.
+
+```{r recycling itt, include=TRUE} 
+
+# Generate data to simulate study - part 1: define key values from problem setup
+treatment_n     <- 1500
+treatment_dosed <- 700
+treatment_rec   <- 500
+control_n       <- 3000
+control_rec     <- 600
+
+# Generate data to simulate study - part 2: create table and treatment groups
+recycling_d   <- data.table(
+  treat = rep(c(1, 0), times = c(treatment_n, control_n)),
+  rec   = 0
+)
+
+# Generate data to simulate study - part 3: add recycling outcomes
+recycling_d[treat == 1, rec := rep(c(1, 0), times = c(
+  treatment_rec, treatment_n - treatment_rec))]
+recycling_d[treat == 0, rec := rep(c(1, 0), times = c(
+  control_rec, control_n - control_rec))]
+
+# Generate data to simulate study - part 4: shuffle rows and add ID's
+shuffled_rows_recycling <- sample(nrow(recycling_d))
+recycling_d             <- recycling_d[shuffled_rows_recycling,
+                                       id := seq_len(treatment_n + control_n)]
+recycling_d             <- recycling_d[order(id)]
+
+# Generate data to simulate study - part 5: reorder columns
+setcolorder(recycling_d, c("id", "treat", "rec"))
+
+# Estimate ITT
+recycling_itt <- recycling_d[treat == 1, mean(rec)] -
+                 recycling_d[treat == 0, mean(rec)]
+
+# Display estimated ITT
+print(recycling_itt)
+
+```
+
+**Answer:** The $ITT$ ("intent-to-treat" effect) is the arithmetic difference between (1) the average recycling rate of the group assigned to receive treatment and (2) the average recycling rate of the group assigned to receive control. Based on the information given, we can estimate the $ITT$ to be approximately `r round(recycling_d[treat == 1, mean(rec)], 4)` - `r round(recycling_d[treat == 0, mean(rec)], 4)` = `r round(recycling_itt, 4)`. This means that the average recycling rate for the group of households that were provided information about the benefits of recycling (the treatment group) was `r round(recycling_itt, 4)` higher than the average recycling rate for the group of households that were not provided information about the benefits of recycling (the control group). However, we know that this $ITT$ is "diluted" compared to the *actual* treatment effect for the households who received treatment, since only a portion of the households intended to receive treatment (i.e., undergraduate students contacting them to explain the benefits of recycling) were actually contacted during the experiment. In order to produce an unbiased estimate of the *actual* treatment effect, we would need to reweight the $ITT$.
+
+## Compliers average causal effect
+What is the CACE? Do the work to compute it, and store it into the object `recycling_cace`.  Provide a short narrative using inline R code.
+
+```{r recycling cace, include=TRUE} 
+
+# Estimate take-up rate (ITT_D or alpha)
+recycling_ittd <- treatment_dosed / treatment_n
+
+# Estimate CACE
+recycling_cace <- recycling_itt / recycling_ittd
+
+# Display estimated CACE
+print(recycling_cace)
+
+```
+
+**Answer:** The $CACE$ ("compliance average causal effect") is the average treatment effect for the households who actually comply with their assignment, known as the "compliers". In this case, we know that only `r treatment_dosed` of `r treatment_n` households (or approximately `r round(recycling_ittd, 4) * 100`%) complied with their assignment to treatment by being contacted by the undergraduate students. This factor --- known as the $ITT_D$ or take-up rate --- is what we need to scale-up/reweight our estimate of the $ITT$ in order to compute the $CACE$. The $CACE$ is equal to the $ITT$ (approximately `r round(recycling_itt, 4)`) divided by the $ITT_D$ (approximately `r round(recycling_ittd, 4)`), which comes out to roughly `r round(recycling_cace, 4)`. Our $CACE$ value provides an estimate of the treatment effect under the assumption that all households in the treatment group had actually complied with their assignment.
+
+```{problem_description}
+There appear to be some inconsistencies regarding how the undergraduates actually carried out the instructions they were given. 
+
+- One of the students, Mike, tells you that they actually lied about the the number of contacted treatment households and that the true number was 500. 
+- Another student, Andy, tells you that the true number was actually 600.
+```
+
+## Mike's CACE
+What is the CACE if Mike is correct?  Provide a short narrative using inline R code.
+
+```{r cace mike, include=TRUE} 
+
+# Define key values from problem setup
+treatment_dosed_mike <- 500
+
+# Estimate take-up rate (ITT_D or alpha) based on Mike's info
+recycling_ittd_mike  <- treatment_dosed_mike / treatment_n
+
+# Estimate Mike's CACE
+cace_mike            <- recycling_itt / recycling_ittd_mike
+
+# Display estimated CACE
+print(cace_mike)
+
+```
+
+**Answer:** If Mike's information is correct, the new $ITT_D$ or take-up rate becomes equal to `r treatment_dosed_mike` / `r treatment_n` = `r round(recycling_ittd_mike, 4) * 100`%. This causes Mike's estimated $CACE$ to become `r round(recycling_itt, 4)` / `r round(recycling_ittd_mike, 4)` = `r round(cace_mike, 4)`. This estimated $CACE$ is higher than before because Mike's info suggests that a lower proportion of households assigned to the treatment group actually complied with their assignment (which increases the extent to which the $ITT$ is scaled-up/reweighted to arrive at the $CACE$).
+
+## Andy's CACE 
+What is the CACE if Andy is correct? Provide a short narrative using inline R code.
+
+```{r cace andy, include=TRUE}
+
+# Define key values from problem setup
+treatment_dosed_andy <- 600
+
+# Estimate take-up rate (ITT_D or alpha) based on Andy's info
+recycling_ittd_andy  <- treatment_dosed_andy / treatment_n
+
+# Estimate Andy's CACE
+cace_andy            <- recycling_itt / recycling_ittd_andy
+
+# Display estimated CACE
+print(cace_andy)
+
+```
+
+**Answer:** If Andy's information is correct, the new $ITT_D$ or take-up rate becomes equal to `r treatment_dosed_andy` / `r treatment_n` = `r round(recycling_ittd_andy, 4) * 100`%. This causes Andy's estimated $CACE$ to become `r round(recycling_itt, 4)` / `r round(recycling_ittd_andy, 4)` = `r round(cace_andy, 4)`. This estimated $CACE$ is higher than our original estimate --- but lower than the estimate based on Mike's info --- because Andy's claim suggests that a lower proportion of households assigned to the treatment group actually complied with their assignment, though not as low as Mike's claim. In both circumstances, we end up with the understanding that fewer households actually complied, leading to a smaller scaling-up/reweighting factor and a larger $CACE$.
+
+```{problem_description}
+For the rest of this question, suppose that **in fact** Mike was telling the truth.  
+```
+
+## Effect of false reporting
+What was the impact of the undergraduates’s false reporting on our estimates of the treatment’s effectiveness?
+
+**Answer:** In the calculations above, we saw that the undergraduates' false reporting directly impacted our estimates of the $CACE$, which represents the treatment effect for "compliers". However, it's also worth noting that in *Field Experiments*, Gerber & Green state that changing the $ITT_D$ (or treatment take-up rate) doesn't always necessarily change the $CACE$; in fact, it could change both the numerator (the $ITT$) and the denominator ($ITT_D$) of the fraction to compute the $CACE$ --- depending on how "compliers" respond to treatment --- resulting in either a changed or unchanged $CACE$ (p. 147). While we didn't recompute the $ITT$ above --- since we could reasonably assume that any "complier" households responded to treatment under the scenario where Mike was correct or the scenario where Andy was correct, just as reasonably as we could have assumed that some of these "complier" households didn't respond to treatment in one or both of those scenarios --- it's certainly possible that our earlier $ITT$ estimate could have changed based on Mike or Andy's info, and that the $CACE$ (under Mike or Andy's assumptions) could have actually remain unchanged. If Mike's information was in fact accurate, and if all 500 of the households in the treatment group that were successfully contacted by undergraduates recycled (i.e., 100% of them), we might suspect that the effectiveness of the treatment is quite high. Meanwhile, if Mike's information was in fact accurate, yet none of the 500 households in the treatment group that were successfully contacted by undergraduates recycled (i.e., 0% of them) but only those in the remaining subset of the treatment group recycled, we might suspect that the effectiveness of the treatment is quite low. This shows that our understanding of the treatment's effectiveness would change depending on *which specific* recycling households from the treatment group complied with/received the treatment and which did not. Ultimately, either way, in experiments where non-compliance exists, estimates of the treatment's effectiveness are more challenging to nail down in a way that isn't biased, especially when non-compliance or uncertainty about the level of compliance (as in this particular recycling experiment) is high.
+
+## Effect of false reporting... on what quantity?
+Does your answer change depending on whether you choose to focus on the ITT or the CACE?
+
+**Answer:** Yes, as noted in the previous answer, the $CACE$ changes in response to the undergraduates' false reporting, while the $ITT$ does not --- though, to be clear, that's *not* because the $ITT$ is by necessity always unimpacted by considerations around $ITT_D$ or take-up rate (in the general sense). In this particular experiment, I'm assuming that the proportion of households assigned to the treatment group that recycled remains unchanged, along with the proportion of households assigned to the control group that recycled, *regardless of assignment compliance*. This means that our $ITT$ doesn't change even if our understanding of the level of compliance across the treatment group changes (e.g., based on Mike's info or Andy's info), because the $ITT$ is based on the arithmetic difference between the average recycling rate for households in the treatment group and the average recycling rate for households in the control group (with no compliance considerations impacting either one). However, one could imagine a scenario where false reporting on complying participants also calls into question the accuracy of reporting on outcome behaviors --- leading to a change in $ITT$ --- or, at the very least, adds more uncertainty (or potentially bias) to an understanding of the treatment's effectiveness (as noted in the previous answer).

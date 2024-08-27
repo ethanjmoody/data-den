@@ -1,0 +1,360 @@
+# Now! Do it with data 
+
+```{r load packages - question 3 instance, warning=FALSE, message=FALSE}
+library(data.table)
+
+library(sandwich)
+library(lmtest)
+
+library(stargazer)
+library(knitr)
+
+library(ggplot2)
+library(patchwork)
+
+library(foreign)
+inline_reference <- "r inline_reference"
+```
+
+```{problem_description}
+Download the data set for the recycling study in the previous problem, obtained from the authors. We will be focusing on the outcome variable Y="number of bins turned in per week" (avg_bins_treat).
+```
+
+```{r load and examine data, include=FALSE}
+# Load data for analysis
+d <- foreign::read.dta("../data/karlan_data_subset_for_class.dta")
+d <- data.table(d)
+head(d)
+
+## Do some quick exploratory data analysis with this data. 
+## There are some values in this data that seem a bit strange. 
+
+## Determine what these are. 
+## Don't make an assessment about keeping, changing, or 
+## dropping just yet, but at any point that your analysis touches 
+## these variables, you'll have to determine what is appropriate 
+## given the analysis you are conducting. 
+
+# Factor `street` column for subsequent modeling steps
+d                      <- d[, street := factor(street)]
+
+# Add `nocell` column for subsequent modeling steps
+d                      <- d[, nocell := 1 - havecell]
+
+# Examine number of observations by `street` column
+d_streets              <- d[, .(obs_count = .N), keyby = street]
+## NOTE: Seeing some strange values here (-999 and NA)
+
+# Identify "strange streets" with unexpected values
+d_strange_streets      <- d_streets[(is.na(street) | street == "-999"),
+                               .(obs_count = sum(obs_count)), keyby = street]
+## NOTE: Isolate and count up these strange values
+
+# Compute percentage of data records that have "strange street" values
+d_pct_strange_streets  <- (
+  d_strange_streets[, sum(obs_count)] / d_streets[, sum(obs_count)]
+  ) * 100
+## NOTE: Determine what fraction of overall dataset has these strange values
+
+# Examine number of observations by `havecell` column
+d_havecell             <- d[, .(obs_count = .N), keyby = havecell]
+## NOTE: Seeing some strange values here (NA)
+
+# Identify "strange cells" with unexpected values
+d_strange_cells        <- d_havecell[(is.na(havecell)),
+                               .(obs_count = sum(obs_count)), keyby = havecell]
+## NOTE: Isolate and count up these strange values
+
+# Compute percentage of data records that have "strange cells" values
+d_pct_strange_cells    <- (
+  d_strange_cells[, sum(obs_count)] / d_havecell[, sum(obs_count)]
+  ) * 100
+## NOTE: Determine what fraction of overall dataset has these strange values
+
+# Examine number of observations by additional categorical columns
+d_allother              <- d[, .(obs_count = .N),
+                             keyby = .(bin, sms, bin_s, bin_g, sms_p, sms_g)]
+## NOTE: All of these columns look fine -- no strange values
+```
+
+```{r clean data based on findings from data load and EDA, include=FALSE}
+# Removing NA values for `street` identified in earlier step
+# NOTE 1: There are only a few NAs - minimal proportion of overall dataset
+# NOTE 2: Later modeling steps require a consistent dataset size (e.g., ANOVA)
+d <- na.omit(d)
+```
+
+## Treatment only model
+A. For simplicity, let's start by measuring the effect of providing a recycling bin, ignoring the SMS message treatment (and ignoring whether there was a sticker on the bin or not).  Run a regression of Y on only the bin treatment dummy, so you estimate a simple difference in means.  Provide a 95% confidence interval for the treatment effect, using **of course** robust standard errors (use these throughout) and provide a brief narrative using R inline statements. 
+
+```{r estimate basic model, include=TRUE, results="asis"}
+# Model the effect of a recycling bin on recycling outcome (avg. bins per week)
+mod_basic             <- d[, lm(
+  avg_bins_treat ~ bin)]
+
+# Create model summary output for reference
+mod_basic_summary     <- summary(mod_basic)
+
+# Calculate robust standard errors (RSEs)
+mod_basic_rses        <- sqrt(diag(vcovHC(mod_basic)))
+
+# Calculate 95% confidence interval with RSEs for estimated effect
+mod_basic_95ci_rse_LB <- coefci(
+  mod_basic, vcov = vcovHC(mod_basic))[2]
+mod_basic_95ci_rse_UB <- coefci(
+  mod_basic, vcov = vcovHC(mod_basic))[4]
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_basic,
+  se = list(mod_basic_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("NA Values Removed (No.)", "Yes (4)")),
+  type = "latex",
+  header = FALSE)
+
+# Display estimated effect, RSEs, and 95% confidence interval
+paste("Estimated bin effect:", round(mod_basic_summary$coefficients[2], 3))
+paste("Estimated RSE:", "(", round(mod_basic_rses[2], 3), ")")
+paste("Estimated 95% CI:", "[", round(mod_basic_95ci_rse_LB, 3), ",",
+      round(mod_basic_95ci_rse_UB, 3), "]")
+```  
+
+**Narrative: Our basic model suggests that providing a recycling bin has a positive effect on the average number of bins turned in per week per household. The treatment effect of providing a recycling bin is given by the coefficient for `bin` in the table above (`r round(mod_basic_summary$coefficients[2], 3)`), with the 95% confidence interval around this effect spanning [`r round(mod_basic_95ci_rse_LB, 3)`, `r round(mod_basic_95ci_rse_UB, 3)`]. The robust standard error (RSE) for this effect is given by the number in parentheses beneath this coefficient (`r round(mod_basic_rses[2], 3)`). These results indicate that when a recycling bin is provided to a given household, the average number of recycling bins turned in by that household per week generally increases by somewhere between `r round(mod_basic_95ci_rse_LB, 3)` and `r round(mod_basic_95ci_rse_UB, 3)` bins.**
+
+## Treatment and pre-treatment values
+Now add the pre-treatment value of Y as a covariate.  Provide a 95% confidence interval for the treatment effect.  Explain how and why this confidence interval differs from the previous one.
+
+```{r add pre-treatment values, include=TRUE, results="asis"}
+# Model the effect of a recycling bin + baseline bins on recycling outcome
+mod_pretreat             <- d[, lm(
+  avg_bins_treat ~ bin + base_avg_bins_treat)]
+
+# Create model summary output for reference
+mod_pretreat_summary     <- summary(mod_pretreat)
+
+# Calculate robust standard errors (RSEs)
+mod_pretreat_rses        <- sqrt(diag(vcovHC(mod_pretreat)))
+
+# Calculate 95% confidence interval with RSEs for estimated effect
+mod_pretreat_95ci_rse_LB <- coefci(
+  mod_pretreat, vcov = vcovHC(mod_pretreat))[2]
+mod_pretreat_95ci_rse_UB <- coefci(
+  mod_pretreat, vcov = vcovHC(mod_pretreat))[5]
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_pretreat,
+  se = list(mod_pretreat_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("NA Values Removed (No.)", "Yes (4)")),
+  type = "latex",
+  header = FALSE)
+
+# Display estimated effect, RSEs, and 95% confidence interval
+paste("Estimated bin effect:", round(mod_pretreat_summary$coefficients[2], 3))
+paste("Estimated RSE:", "(", round(mod_pretreat_rses[2], 3), ")")
+paste("Estimated 95% CI:", "[", round(mod_pretreat_95ci_rse_LB, 3), ",",
+      round(mod_pretreat_95ci_rse_UB, 3), "]")
+```  
+
+**Answer:** Adding the pre-treatment value for `base_avg_bins_treat` to our second model reduces our standard error for the treatment effect estimate of providing a recycling bin and tightens the 95% confidence interval around this treatment effect. The new 95% confidence interval around this effect (`r round(mod_pretreat_summary$coefficients[2], 3)`) spans [`r round(mod_pretreat_95ci_rse_LB, 3)`, `r round(mod_pretreat_95ci_rse_UB, 3)`], which is not as wide of a range as with our first basic model. This suggests that the average number of recycling bins provided per week by a given household pre-treatment is a good predictor of the average number of recycling bins provided per week by that same household post-treatment, and including it in our model increases the precision of our model's predictions/estimates.
+
+## Add state fixed effects
+Now add the street fixed effects.  (You'll need to use the R command `factor()` You can do this either within the `lm` call, or you can move this factoring up in the data pipeline so that it persists through the rest of your analysis. The only thing we would recommend that you *not* do is to engineer a new, persistent feature at this point.) Provide a 95% confidence interval for the treatment effect and provide a brief narrative using r inline statements.  
+
+```{r add fixed effects, include=TRUE, results="asis"}
+# Model the effect of a recycling bin + baseline bins + street on recycling outcome
+mod_fixed_effects             <- d[, lm(
+  avg_bins_treat ~ bin + base_avg_bins_treat + street)]
+## NOTE: Factor applied to `street` right after loading in original data
+
+# Create model summary output for reference
+mod_fixed_effects_summary     <- summary(mod_fixed_effects)
+
+# Calculate robust standard errors (RSEs)
+mod_fixed_effects_rses        <- sqrt(diag(vcovHC(mod_fixed_effects)))
+
+# Calculate 95% confidence interval with RSEs for estimated effect
+mod_fixed_effects_95ci_rse_LB <- coefci(
+  mod_fixed_effects, vcov = vcovHC(mod_fixed_effects))[2]
+mod_fixed_effects_95ci_rse_UB <- coefci(
+  mod_fixed_effects, vcov = vcovHC(mod_fixed_effects))[184]
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_fixed_effects,
+  se = list(mod_fixed_effects_rses),
+  omit = "street",
+  add.lines = list(c("Using Robust Standard Errors", "Yes"),
+                   c("Including Street Fixed Effects", "Yes"),
+                   c("NA Values Removed (No.)", "Yes (4)")),
+  type = "latex",
+  header = FALSE)
+
+# Display estimated effect, RSEs, and 95% confidence interval
+paste("Estimated bin effect:", round(mod_fixed_effects_summary$coefficients[2], 3))
+paste("Estimated RSE:", "(", round(mod_fixed_effects_rses[2], 3), ")")
+paste("Estimated 95% CI:", "[", round(mod_fixed_effects_95ci_rse_LB, 3), ",",
+      round(mod_fixed_effects_95ci_rse_UB, 3), "]")
+```  
+
+**Narrative: This time, adding another variable to our model (in this case, one that represents street fixed effects) increases our standard error for the treatment effect estimate of providing a recycling bin and slightly opens up the 95% confidence interval around this treatment effect. The new 95% confidence interval around this effect (`r round(mod_fixed_effects_summary$coefficients[2], 3)`) spans [`r round(mod_fixed_effects_95ci_rse_LB, 3)`, `r round(mod_fixed_effects_95ci_rse_UB, 3)`], which is a slightly wider range than what we observed with our first or second models. At the same time, including street fixed effects reduces the estimated treatment effect of providing a recycling bin. These two observations together suggest that (1) including street fixed effects reduces the risk of overestimating the treatment effect, where overestimation could result from the model incorrectly attributing more of the variation in post-treatment recycling outcomes between control/treatment groups to the treatment itself (providing a recycling bin) than to meaningful preexisting differences in recycling behaviors by street/location, and (2) the random assignment and street-level stratification procedures mentioned by the authors were appropriately executed and led to well-balanced, sufficiently randomized control/treatment groups. The higher standard error in this case may be a byproduct of the model trying to amend its "fit" to account for street-level variability in recycling behaviors, which --- given the granularity of street data --- almost certainly has much more variability than the "aggregate group" of households does.**
+
+## Test for block fixed effects
+Recall that the authors described their experiment as "stratified at the street level," which is a synonym for blocking by street.  Does including these block fixed effects change the standard errors of the estimates *very much*? Conduct the appropriate test for the inclusion of these block fixed effects, and interpret them in the context of the other variables in the regression. 
+
+```{r test for fixed effects, include=TRUE}
+# Run F-test (ANOVA) between prior two models, w/ fixed effects and w/o fixed effects
+test_fixed_effects        <- anova(mod_pretreat, mod_fixed_effects, test = "F")
+
+# Display result of F-test (ANOVA)
+test_fixed_effects
+
+# Extract and print estimated F-statistic from F-test
+test_fixed_effects_fstat  <- round(test_fixed_effects$F[2], 4)
+paste("Estimated F-statistic:", test_fixed_effects_fstat)
+
+# Extract and print estimated p-value from F-test
+test_fixed_effects_pvalue <- round(test_fixed_effects$`Pr(>F)`[2], 9)
+paste("Estimated p-value:", test_fixed_effects_pvalue)
+```  
+
+**Answer:** The inclusion of block fixed effects *does* appear to change our model estimates meaningfully, even though the difference in standard error between our `mod_pretreat` model and `mod_fixed_effects` model doesn't appear to be that large (just using the eyeball test). This could be because we're adding the street fixed effects to the model *after* already including the significantly predictive baseline bin return rate variable (which is picking up on household-level differences in recycling behavior, much like streets would/do). An F-test (ANOVA) between our `mod_pretreat` model and `mod_fixed_effects` model shows an F-statistic of `r test_fixed_effects_fstat` with a highly significant p-value (at the <1% level) of `r test_fixed_effects_pvalue`. This result suggests that our `mod_fixed_effects` model --- with street fixed effects included --- explains more of the variability in the average number of bins turned in per week per household post-treatment than our `mod_pretreat` model. The higher standard error for our `mod_fixed_effects` model could be related to the assumption of heteroscedastic errors (which is at-play with RSEs, and potentially more pronounced at the street-/block-level), or collinearity/correlation between street-level fixed effects and other predictors/variables in the model, like the baseline bin return measure.
+
+## Feature (no) cell phone 
+Perhaps having a cell phone helps explain the level of recycling behavior. Instead of "has cell phone," we find it easier to interpret the coefficient if we define the variable " no cell phone."  Give the R command to define this new variable, which equals one minus the "has cell phone" variable in the authors' data set.  Use "no cell phone" instead of "has cell phone" in subsequent regressions with this dataset.
+
+```{r feature engineering mid-analysis (dont do this IRL!), include=TRUE}
+## rather than letting this feature engineering persist here -- which is 
+## bad practice because it requires that you keep in mind what code you 
+## have, and what code you have not run
+## 
+## instead, move this recode up to the top of your data loading in this file 
+## so that it runs everytime that you load your data
+
+#############################################################################
+## NOTE: The first code chunk at the top of this .rmd file does this step  ##
+#############################################################################
+```
+
+Now add "no cell phone" as a covariate to the previous regression.  Provide a 95% confidence interval for the treatment effect.  Explain why this confidence interval does not differ much from the previous one.
+
+```{r add cell-phone variable, include=TRUE, results="asis"}
+# Model the effect of a recycling bin + baseline bins + street + no cell on recycling outcome
+mod_cellphone             <- d[, lm(
+  avg_bins_treat ~ bin + base_avg_bins_treat + street + nocell)]
+
+# Create model summary output for reference
+mod_cellphone_summary     <- summary(mod_cellphone)
+
+# Calculate robust standard errors (RSEs)
+mod_cellphone_rses        <- sqrt(diag(vcovHC(mod_cellphone)))
+
+# Calculate 95% confidence interval with RSEs for estimated effect
+mod_cellphone_95ci_rse_LB <- coefci(
+  mod_cellphone, vcov = vcovHC(mod_cellphone))[2]
+mod_cellphone_95ci_rse_UB <- coefci(
+  mod_cellphone, vcov = vcovHC(mod_cellphone))[185]
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_cellphone,
+  se = list(mod_cellphone_rses),
+  omit = "street",
+  add.lines = list(c("Using Robust Standard Errors", "Yes"),
+                   c("Including Street Fixed Effects", "Yes"),
+                   c("NA Values Removed (No.)", "Yes (4)")),
+  type = "latex",
+  header = FALSE)
+
+# Display estimated effect, RSEs, and 95% confidence interval
+paste("Estimated bin effect:", round(mod_cellphone_summary$coefficients[2], 3))
+paste("Estimated RSE:", "(", round(mod_cellphone_rses[2], 3), ")")
+paste("Estimated 95% CI:", "[", round(mod_cellphone_95ci_rse_LB, 3), ",",
+      round(mod_cellphone_95ci_rse_UB, 3), "]")
+```  
+
+**Answer:** Adding an indicator for `nocell` to our model minimally impacts both our standard error for the treatment effect estimate of providing a recycling bin and the 95% confidence interval around this treatment effect. The new 95% confidence interval around this effect (`r round(mod_cellphone_summary$coefficients[2], 3)`) spans [`r round(mod_cellphone_95ci_rse_LB, 3)`, `r round(mod_cellphone_95ci_rse_UB, 3)`], which is about as wide of a range as with our previous model including street fixed effects. This suggests that including an indicator for possession or lack of a cell phone doesn't really change the precision of our model's predictions/estimates for the treatment effect of providing a recycling bin, especially when considered alongside the other variables already included in our model. While it does pull some "signal" (effect) out of the `Constant` (intercept) model term, it doesn't meaningfully impact our standard error estimate or confidence interval because households were randomly assigned to recycling bin experimental groups, making all subsequent cell phone-/text-related variables in this study balanced across bin experimental groups and independent from bin group assignment.
+
+## Add the sms treatment
+Now let's add in the SMS treatment.  Re-run the previous regression with "any SMS" included.  You should get the same results as in Table 4A.  Provide a 95% confidence interval for the treatment effect of the recycling bin.  Explain why this confidence interval does not differ much from the previous one.
+
+```{r add sms treatment, include=TRUE, results="asis"}
+# Model the effect of a recycling bin + baseline bins + street + no cell + sms on recycling outcome
+mod_sms             <- d[, lm(
+  avg_bins_treat ~ bin + base_avg_bins_treat + street + nocell + sms)]
+
+# Create model summary output for reference
+mod_sms_summary     <- summary(mod_sms)
+
+# Calculate robust standard errors (RSEs)
+mod_sms_rses        <- sqrt(diag(vcovHC(mod_sms)))
+
+# Calculate 95% confidence interval with RSEs for estimated effect
+mod_sms_95ci_rse_LB <- coefci(
+  mod_sms, vcov = vcovHC(mod_sms))[2]
+mod_sms_95ci_rse_UB <- coefci(
+  mod_sms, vcov = vcovHC(mod_sms))[186]
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_sms,
+  se = list(mod_sms_rses),
+  omit = "street",
+  add.lines = list(c("Using Robust Standard Errors", "Yes"),
+                   c("Including Street Fixed Effects", "Yes"),
+                   c("NA Values Removed (No.)", "Yes (4)")),
+  type = "latex",
+  header = FALSE)
+
+# Display estimated effect, RSEs, and 95% confidence interval
+paste("Estimated bin effect:", round(mod_sms_summary$coefficients[2], 3))
+paste("Estimated RSE:", "(", round(mod_sms_rses[2], 3), ")")
+paste("Estimated 95% CI:", "[", round(mod_sms_95ci_rse_LB, 3), ",",
+      round(mod_sms_95ci_rse_UB, 3), "]")
+```  
+
+**Answer:** Similarly, adding an indicator for `sms` (any SMS) to our model minimally impacts both our standard error for the treatment effect estimate of providing a recycling bin and the 95% confidence interval around this treatment effect. The new 95% confidence interval around this effect (`r round(mod_sms_summary$coefficients[2], 3)`) spans [`r round(mod_sms_95ci_rse_LB, 3)`, `r round(mod_sms_95ci_rse_UB, 3)`], which is virtually identical to what we observed with our previous model including street fixed effects. Just like in the previous scenario, this suggests that including an indicator for text/SMS messages doesn't meaningfully change the precision of our model's predictions/estimates for the treatment effect of providing a recycling bin, especially when considered alongside the other variables already included in our model. Again, like before, it does pull a little bit of "signal" (effect) out of the `Constant` (intercept) model term and `nocell` model term, but it doesn't meaningfully affect our standard error estimate or confidence interval because text/SMS treatments were entirely independent from bin treatments.
+
+## Reproduce Table 4B, Column (2)
+Now reproduce the results of column 2 in Table 4B, estimating separate treatment effects for the two types of SMS treatments and the two types of recycling-bin treatments.  Provide a 95% confidence interval for the effect of the unadorned recycling bin.  Explain how your answer differs from that in question 3.6, and explain why you think it differs.
+
+```{r full model, include=TRUE, results="asis"}
+# Model the effect of a recycling bin and all other predictors on recycling outcome
+mod_full             <- d[, lm(
+  avg_bins_treat ~ bin_s + bin_g + sms_p + sms_g + nocell + base_avg_bins_treat + street)]
+
+# Create model summary output for reference
+mod_full_summary     <- summary(mod_full)
+
+# Calculate robust standard errors (RSEs)
+mod_full_rses        <- sqrt(diag(vcovHC(mod_full)))
+
+# Calculate 95% confidence interval with RSEs for estimated effect
+mod_full_95ci_rse_LB <- coefci(
+  mod_full, vcov = vcovHC(mod_full))[3]
+mod_full_95ci_rse_UB <- coefci(
+  mod_full, vcov = vcovHC(mod_full))[189]
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_full,
+  se = list(mod_full_rses),
+  omit = "street",
+  add.lines = list(c("Using Robust Standard Errors", "Yes"),
+                   c("Including Street Fixed Effects", "Yes"),
+                   c("NA Values Removed (No.)", "Yes (4)")),
+  type = "latex",
+  header = FALSE)
+
+# Display estimated effect, RSEs, and 95% confidence interval
+paste("Estimated bin w/o sticker effect:", round(mod_full_summary$coefficients[3], 3))
+paste("Estimated RSE:", "(", round(mod_full_rses[3], 3), ")")
+paste("Estimated 95% CI:", "[", round(mod_full_95ci_rse_LB, 3), ",",
+      round(mod_full_95ci_rse_UB, 3), "]")
+```  
+
+**Answer:** Our full model suggests that providing a recycling bin still has a positive effect on the average number of bins turned in per week per household, even when the bin is generic and has no sticker. The treatment effect of providing an "unadorned" recycling bin is given by the coefficient for `bin_g` in the table above (`r round(mod_full_summary$coefficients[3], 3)`), with the 95% confidence interval around this effect spanning [`r round(mod_full_95ci_rse_LB, 3)`, `r round(mod_full_95ci_rse_UB, 3)`]. The main reason why this confidence interval is different (and wider) than the confidence interval in the previous question is because we've now split the generic `bin` (any bin) variable into separate `bin_s` (bin-with-sticker) and `bin_g` (bin-without-sticker) variables in the full model. This splitting of the treatment variable into two "flavors" of treatment forces the model to fit its predictions on both of these variables separately and impacts prediction errors. Random assignment should limit the extent of differences in variability across street fixed effects and pre-treatment baseline recycling behaviors between treatment groups receiving the `bin_g` vs. `bin_s` bin treatment, though there still could be some differences impacting the treatment effect standard error and the resulting confidence interval, causing a small difference in the interval for this model relative to the previous version.

@@ -1,0 +1,143 @@
+# Peruvian Recycling 
+
+```{r load packages - question 1 instance, warning=FALSE, message=FALSE}
+library(data.table)
+
+library(sandwich)
+library(lmtest)
+
+library(stargazer)
+library(knitr)
+
+library(ggplot2)
+library(patchwork)
+
+library(foreign)
+inline_reference <- "r inline_reference"
+```
+
+```{problem_description}
+Look at the article located here (./readings/recycling_peru.pdf) about encouraging recycling in Peru.  The paper contains two experiments, a "participation study" and a "participation intensity study."  In this problem, we will focus on the latter study, whose results are contained in Table 4 in this problem.  You will need to read the relevant section of the paper (starting on page 20 of the manuscript) in order to understand the experimental design and variables.  (*Note that "indicator variable" is a synonym for "dummy variable," in case you have not seen this language before.*)
+
+
+```
+
+## Recycling bin ATE
+In Column 3 of Table 4A, what is the estimated ATE of providing a recycling bin on the average weight of recyclables turned in per household per week, during the six-week treatment period?  Provide a 95% confidence interval.  Provide a short narrative using inline R code, such as `r inline_reference`.
+
+```{r chunk1, include = TRUE}
+# Use this code chunk to show your code work (if needed)
+
+# Define ATE of bin on avg. weight of recyclables (given in paper, p. 20)
+bin_weight_ATE        <- 0.187
+
+# Define SE of bin on avg. weight of recyclables (given in paper, p. 20)
+bin_weight_SE         <- 0.032
+
+# Define confidence level for 95% CI
+bin_weight_CL_val     <- 0.95
+
+# Define critical t-value for 95% CI (approx. z-score given Obs [N] > 1000)
+bin_weight_CI_critval <- qnorm((1 + bin_weight_CL_val) / 2)
+
+# Calculate 95% CI around ATE (LB = Lower Bound, UB = Upper Bound)
+bin_weight_ATE_CI_LB  <- bin_weight_ATE - (bin_weight_CI_critval * bin_weight_SE)
+bin_weight_ATE_CI_UB  <- bin_weight_ATE + (bin_weight_CI_critval * bin_weight_SE)
+
+# Display ATE and 95% CI
+paste("Estimated ATE:", bin_weight_ATE)
+paste("95% CI:", "[",
+      round(bin_weight_ATE_CI_LB, 4), ",",
+      round(bin_weight_ATE_CI_UB, 4), "]")
+```  
+
+**Answer:** According to Table 4A (see p. 20 of the paper), the estimated ATE of providing a recycling bin on the average weight of recyclables turned in per household per week during the six-week treatment period is **`r bin_weight_ATE`** (measured in kg). Using the standard error of `r bin_weight_SE` also provided in the table, we can estimate a 95% confidence interval around the ATE. This confidence interval can be written as **[`r round(bin_weight_ATE_CI_LB, 4)`, `r round(bin_weight_ATE_CI_UB, 4)`]**. Both the ATE and 95% confidence interval indicate that providing a recycling bin has a positive effect on (i.e., increases) the average weight in kg of recyclables for a household. Based on the table, this effect appears to be statistically significant at the 1% confidence level.
+
+## SMS ATE
+In Column 3 of Table 4A, what is the estimated ATE of sending a text message reminder on the average weight of recyclables turned in per household per week?  Provide a 95% confidence interval and provide a short narrative using inline R code.    
+
+```{r chunk2, include = TRUE}
+# Use this code chunk to show your code work (if needed)
+
+# Define ATE of text/SMS on avg. weight of recyclables (given in paper, p. 20)
+sms_weight_ATE        <- -0.024
+
+# Define SE of text/SMS on avg. weight of recyclables (given in paper, p. 20)
+sms_weight_SE         <- 0.039
+
+# Define confidence level for 95% CI
+sms_weight_CL_val     <- 0.95
+
+# Define critical t-value for 95% CI (approx. z-score given Obs [N] > 1000)
+sms_weight_CI_critval <- qnorm((1 + sms_weight_CL_val) / 2)
+
+# Calculate 95% CI around ATE (LB = Lower Bound, UB = Upper Bound)
+sms_weight_ATE_CI_LB  <- sms_weight_ATE - (sms_weight_CI_critval * sms_weight_SE)
+sms_weight_ATE_CI_UB  <- sms_weight_ATE + (sms_weight_CI_critval * sms_weight_SE)
+
+# Display ATE and 95% CI
+paste("Estimated ATE:", sms_weight_ATE)
+paste("95% CI:", "[",
+  round(sms_weight_ATE_CI_LB, 4), ",",
+  round(sms_weight_ATE_CI_UB, 4), "]")
+```  
+
+**Answer:** According to Table 4A (see p. 20 of the paper), the estimated ATE of sending a text message reminder (SMS) on the average weight of recyclables turned in per household per week during the six-week treatment period is **`r sms_weight_ATE`** (measured in kg). Using the standard error of `r sms_weight_SE` also provided in the table, we can estimate a 95% confidence interval around the ATE. This confidence interval can be written as **[`r round(sms_weight_ATE_CI_LB, 4)`, `r round(sms_weight_ATE_CI_UB, 4)`]**. On the surface, the ATE suggests that sending a text message reminder has a slightly negative effect on (i.e., decreases) the average weight of recyclables in kg for a household. *However, since this result is not statistically significant, we could say that it's plausible to observe this effect simply due to chance, and not because of the influence of a text/SMS message; it's also (arguably) practically insignificant, being such a small number*.
+
+## What outcomes does a recycling bin affect? 
+Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of providing a recycling bin? How are you dealing with the issue that there are several different tests that have been run, and that you are reading? How, if at all, do the authors deal with this? 
+
+**Answer:** In Table 4A, the outcome measures that show a statistically significant effect of providing a recycling bin are (1) "percentage of visits turned in bag" (i.e., the proportion of weeks in which the household had an opportunity to turn in a bag or bin of recyclables and in which they actually did so), (2) "avg. no. of bins turned in per week" (i.e., the average volume of recyclables turned in to the collector, measured by the number of full standard-sized bins given to the collector over the six weeks of post-treatment data collection), (3) "avg. weight (in kg) of recyclables turned in per week" (i.e., the average weight of recyclables given over the six weeks of post-treatment data collection), and (4) "avg. market value of recyclables given per week" (i.e., the average value of the recyclables that were given in terms of prices received by the collector for the items collected over the six weeks of post-treatment data collection). The authors of this study run numerous different tests, which incorporate several different independent/predictor variables and several different dependent/outcome variables, yet they ultimately do not explicitly address the multiple-comparisons problem. As a result, we *might* consider their research to be at risk of drawing conclusions from a "fishing expedition," where significant results MAY arise simply due to chance from the sheer magnitude of different tests run. To avoid this problem, the authors could have either (A) run a Bonferroni or some other type of p-value correction to account for the multiple comparisons they're investigating and to help avoid overstating significance in their results (i.e., by "raising the bar" or threshold for what constitutes a significant difference), and/or (B) considered their findings to be interesting hypotheses that are worth testing individually to check for replicability in a follow-up study. Because they did not do either (A) or (B), the significant effects noted above in (1) through (4) *might* actually be chance noise (unlikely since they all corroborate each other, yet still possible), and it'd be well worth it to perform a second study that evaluates one of the tested treatments individually (e.g., providing bins vs. not providing bins) to see if the authors' results can be reproduced.
+
+## What outcomes does a SMS affect? 
+Which outcome measures in Table 4A show statistically significant effects (at the 5% level) of sending text messages? Now that you have read across two different treatments, and many outcomes, what, if anything do the p-values mean to you? Does this feel like p-hacking or doing careful investigation? 
+
+**Answer:** In Table 4A, there are no outcome measures that show a statistically significant effect of sending texts/SMS messages. This is confirmed on p. 18 of the paper, where the authors comment that "our findings do not indicate a clear impact of SMS reminders" *when important control variables --- like whether a given household has a cell phone, or street characteristics --- are omitted.* Because the authors are running so many different comparisons (i.e., multiple different treatments, many different outcomes) without doing any correction/adjustment to p-values, there is *potentially* some p-hacking going on with this study --- but I wouldn't say that's certainly the case. When a large number of different comparisons are performed, it's possible to see one or more significant effects simply due to chance. However, it's also possible to see several significant effects that essentially "reinforce" each other (i.e., one test looking at a behavior from one angle may reveal significance, and if another test looking at that same behavior from another angle reveals significance, too, there could be a compelling result there). As a result, I'm only putting *some* stock in the p-values I'm seeing in Table 4A. Had the authors raised the threshold required to establish significance and reject their null hypotheses (e.g., considered only p-values of < 0.01 to be significant) and *still* observed significant results, and/or had they run a follow-up experiment to corroborate their results, then I would feel better about taking the asterisked p-values in their paper more seriously. For now, I think they point to an interesting hypothesis that providing a recycling bin *does* impact household recycling behavior (across a number of different dimensions), which --- I think --- should be further validated by a follow-up study.
+
+## Marginal effects
+Suppose that, during the two weeks before treatment, household A turns in 2kg per week more recyclables than household B does, and suppose that both households are otherwise identical (including being in the same treatment group).  From the model, how much more recycling do we predict household A to have than household B, per week, during the six weeks of treatment?   Provide only a point estimate, as the confidence interval would be a bit complicated.  This question is designed to test your understanding of slope coefficients in regression.  
+
+```{r chunk3, include = TRUE}
+# Use this code chunk to show your code work (if needed)
+
+# Define pre-treatment avg. recycling weight difference between HH A and HH B
+baseline_avg_weight_diff   <- 2
+
+# Define coefficient for baseline avg. recyclable weight (given in paper, p. 20)
+coef_baseline_avg_weight   <- 0.281
+
+# Calculate prediction for avg. recycling weight difference between HH A and HH B
+pred_recycling_weight_diff <- baseline_avg_weight_diff * coef_baseline_avg_weight
+
+# Display predicted point estimate
+paste("Predicted Difference in Avg. Recycling Weight (in kg) per Week:",
+      pred_recycling_weight_diff)
+```  
+
+**Answer:** Given a baseline difference of `r baseline_avg_weight_diff`kg in avg. recyclables per week between household A and household B, and based on the assumption that both households are otherwise identical to each other, we could use the results from Table 4A to predict that household A will turn in 
+`r baseline_avg_weight_diff`kg * `r coef_baseline_avg_weight` = **`r pred_recycling_weight_diff`kg** more of recycling per week than household B during the six weeks of treatment.
+
+## Covariates or confounders?
+Suppose that the variable "percentage of visits turned in bag, baseline" had been left out of the regression reported in Column 1.  What would you expect to happen to the results on providing a recycling bin?  Would you expect an increase or decrease in the estimated ATE?  Would you expect an increase or decrease in the standard error?  Explain your reasoning.  
+
+```{r chunk4, include = TRUE}
+# Use this code chunk to show your code work (if needed)
+# See written answer below
+```  
+
+**Answer:** If the variable "percentage of visits turned in bag, baseline" had been left out of the regression reported in Column 1 of Table 4A, I'd expect the estimated ATE for providing a recycling bin to *remain the same* and the estimated standard error to *increase*. This variable is a key pre-treatment predictor/covariate of recycling behavior because it measures preexisting recycling tendencies among households (i.e., tendencies that exist prior to the experimental treatment period and that, based on the regression results, appear to influence treatment outcomes). However, we know from the paper that households were equally likely to be randomly assigned to the control and treatment conditions/groups, *regardless of their baseline behaviors*. As a result, assuming the random assignment was executed cleanly, it'd be reasonable to expect that the control and treatment groups would have had a roughly equivalent make-up of households with higher or lower baseline recycling behaviors in the pre-treatment period. So, if this variable were omitted from the regression, we really shouldn't expect to see any impact to the ATE; it'd be the same either way, due to the fact that differences in this pre-treatment predictor/covariate were neutralized (or controlled for) up-front by random assignment. Separately, though, we could expect to see a change in the standard error if this variable were omitted. This omission would force the model to be fit on fewer predictors to explain the variability in outcomes between the control and treatment groups, which would reduce the precision of its estimates and increase the amount of "signal" (effect) flowing into the error term of the linear regression formula. As a result, leaving out this variable would increase the estimated standard error.
+
+## Bad control or useful subset? 
+In column 1 of Table 4A, would you say the variable "has cell phone" is a bad control?  Explain your reasoning, and engage both with the definition of a bad control, and also the implications of including a bad control in a model.  
+
+**Answer:** I wouldn't necessarily say the variable "has cell phone" is a bad control. However, this is a tricky question because "has cell phone" is essentially connected with (i.e., not really independent from) the text/SMS message treatment. In other words, the text/SMS message treatment presupposes the presence of a cell phone. A bad control is generally defined as a variable that could be affected by the treatment, or could be considered an outcome variable. Including a bad control in a regression --- especially when it's a post-treatment variable --- could lead to biased estimates, as the model would attribute some of the "signal" (effect) of the ATE to the bad control variable rather than to the treatment. In this study, I don't see any clear-cut evidence that households changed their possession of a cell phone in response to receiving a recycling bin or text/SMS message; instead, the "has cell phone" variable remained fixed throughout the experiment and was not responsive to or affected by any experimental treatment. For this reason, it doesn't seem to be a bad control on the basis of the definition of a bad control given above. I think the comparison of results between households that did have a cell phone and those that did not is actually, on the whole, useful for understanding the treatment effects in the study, since it allows us to tease out some insights around what having a cell phone means with respect to recycling behaviors. Now, interestingly, the authors note the following on p. 6 of the paper: *"Although the use of cell phones has grown recently in Peru, phones remain relatively expensive and are not affordable to all households. The full impact of the campaign was only experienced by households that both owned a cell phone and were willing to share their phone number because only these households received the reinforcement text messages prior to the marketing agent visit. As shown in supplemental table S1.1, cell phone owners in the participation study were slightly richer, more educated, and more interested in local affairs (especially recycling matters) than non-cell phone owners."* I think this statement suggests that mere possession of a cell phone isn't necessarily what drives recycling behaviors to be different for some households than others; instead, it's possible that those households who have cell phones are more active recyclers because they're "slightly richer, more educated, and more interested in local affairs (especially recycling matters)" than those households who don't have cell phones. That is to say, other characteristics/attributes of these households may underlie both why they have cell phones and why they engage in more pro-recycling behaviors. So, including "has cell phone" is useful for seeing differences in the recycling behaviors between groups in this study, but --- based on the authors' admission --- the *mechanism* by which those differences come about could be related to factors/variables other than cell phone ownership (such as higher interest in local affairs, or even an unmeasured factor underlying that higher interest).
+
+## What happens if you remove "has cell phone"? 
+If we were to remove the "has cell phone" variable from the regression, what would you expect to happen to the coefficient on "Any SMS message"?  Would it go up or down? Explain your reasoning.  
+
+```{r chunk5, include = TRUE}
+# Use this code chunk to show your code work (if needed)
+# See written answer below
+```  
+
+**Answer:** If we were to remove "has cell phone" from the regression reported in Column 1 of Table 4A, I would expect an *increase* in the coefficient on "Any SMS message." This is because some of the "signal" (or difference) in observed recycling outcomes between the control and treatment groups is being picked up through the "has cell phone" variable, and it would be attributed to remaining predictors --- i.e., those that are left in scope, like the "Any SMS message" variable --- if "has cell phone" was omitted. As noted in my prior answer (above), the authors mentioned that households with a cell phone tended to be richer, more educated, and more interested in local affairs --- especially recycling matters --- than households without a cell phone, which suggests that the possession of a cell phone could be associated with greater recycling tendencies. If "has cell phone" was removed, these greater tendencies to recycle --- and, more specifically, the resulting effect of these tendencies on measured recycling outcomes --- would be attributed to the "Any SMS message" variable, since only those households that already possessed a cell phone at the time of the experiment actually received any text/SMS messages during the study.

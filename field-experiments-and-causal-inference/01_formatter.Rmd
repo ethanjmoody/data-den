@@ -1,0 +1,41 @@
+---
+title: "Randomization Inference (RI), t-test Confidence Intervals (CIs), and Power Analysis (PA)"
+date: "October 2023"
+author: "Ethan Moody"
+name: "Ethan Moody"
+output: 
+  pdf_document: 
+    number_sections: true
+---
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(include = FALSE, message = FALSE, warning = FALSE )
+
+knitr::knit_engines$set(problem_description = function(options) {
+  code <- paste(options$code, collapse = "\n")
+})
+```
+
+```{r package loads, warning=FALSE, message=FALSE}
+library(data.table)
+library(sandwich)
+library(lmtest)
+
+library(ggplot2)
+library(knitr)
+```
+
+\tableofcontents
+\newpage
+
+```{r, child='./questions/question_1.Rmd'}
+```
+
+\newpage
+
+```{r, child='./questions/question_2.Rmd'}
+```
+
+\newpage
+
+```{r, child='./questions/question_3.Rmd'}
+```

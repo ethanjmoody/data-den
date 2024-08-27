@@ -1,0 +1,25 @@
+# Consider Designs 
+
+```{problem_description}
+Determine the direction of bias in estimating the ATE for each of the following situations when we randomize at the individual level.  Do we over-estimate, or underestimate? Briefly but clearly explain your reasoning.
+```
+
+## Game night!
+Suppose that you're advertising a board-game or online game to try and increase sales. You decide to individually randomly-assign into treatment and control. After you randomize, you learn that some treatment-group members are friends with control-group members IRL. 
+
+- What is the causal quantity that you would have **liked** to estimate? 
+- What is the causal quantity that you have **in fact** estimated? 
+- Is there any relationship between the two? Do you think that what you have estimated will be higher, lower, or about the same effect as the causal quantity that you would have liked to estimate?
+
+**Answer:** The causal quantity that I would have **liked** to estimate is the *effect of the advertising treatment --- delivered to the treatment group --- on game sales* (in other words, I would have liked to determine whether or not the advertising alone caused additional game sales). Instead, the causal quantity that I have **in fact** estimated is *partly the effect of advertising and partly the effect of word-of-mouth promotion on game sales* since some participants in the treatment group have friends in the control group. Given these friendships, it's plausible to suspect that members in the treatment group would have told their friends in the control group about games they bought and enjoyed over the course of this experiment. It's even plausible to suspect that they shared the advertising/advertisement with them! This would cause us to potentially mis-measure (in this case underestimate) the effect of the advertising *alone* on game sales. I'd imagine that our estimate for the treatment effect of the advertising would be *lower* than the causal quantity that I would have liked to estimate. This is because we might expect average game sales in the control group to trend higher as a result of the social/friendship factor (or word-of-mouth promotion), which would reduce the difference in average sales between the treatment and control groups and lower the measured treatment effect.
+
+## Bonus time!
+As we're writing this question, end-of-year bonuses are being given out in people's companies. (This is not a concept we your instructors have in the program -- each day with your smiling faces is reward enough -- and who needs money anyways?) 
+
+Suppose that you're interested in knowing whether this is a good idea from the point of view of worker productivity and so you agree to randomly assign bonuses to some people. 
+
+- What is the causal quantity that you would have **liked** to estimate? 
+- What is the causal quantity that you have **in fact** estimated? 
+- Is there any relationship between the two? Do you think that what you have estimated will be higher, lower, or about the same effect as the causal quantity that you would have liked to estimate?
+
+**Answer:** The causal quantity that I would have **liked** to estimate is the *effect of bonuses --- delivered/assigned to the treatment group --- on employee productivity* (in other words, I would have liked to determine whether or not the bonuses alone caused a change in worker productivity). Instead, the causal quantity that I have **in face** estimated may be *partly the effect of the bonuses and partly (perhaps even more strongly!) the effect of news about the bonuses and an associated perception of unfairness in how they were doled out on employee productivity*. In this scenario --- like in many workplaces --- I think it's reasonable to assume that employees talk to one another about their bonuses. As a result, it's likely that those randomly assigned to receive a bonus in the treatment group would have friends/close coworkers that were not assigned to receive a bonus in the control group, and they'd share with these friends/coworkers the news that they received a bonus. I'd imagine the reaction of those in the control group to this news would be negative --- for instance, they might express confusion, aggravation, or discouragement/devastation --- and their productivity would change as a result. Based on the assumption that money/pay generally motivates employees to work harder (be more productive), those who received a bonus would likely have higher productivity (on average) and those who didn't receive a bonus would likely have lower productivity (on average). This would cause us to potentially mis-measure (in this case overestimate) the effect of bonuses *alone* on employee productivity. In fact, I'd imagine that our estimate for the treatment effect of the bonuses would be *higher* than the causal quantity that I would have liked to estimate, because the news of no bonus for employees in the control group would reduce their productivity (rather than keep it flat/stable) and cause the difference in average productivity between treatment and control groups to look much more pronounced as a result.

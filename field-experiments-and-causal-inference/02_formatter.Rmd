@@ -1,0 +1,55 @@
+---
+title: "Average Treatment Effects (ATEs), Multi-Factor Experiments (MFEs), and Linear Regressions (LRs)"
+date: "October 2023"
+author: "Ethan Moody"
+name: "Ethan Moody"
+output: 
+  pdf_document: 
+    number_sections: true
+#output: github_document
+---
+
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(include = FALSE, message = FALSE, warning = FALSE )
+
+knitr::knit_engines$set(problem_description = function(options) {
+  code <- paste(options$code, collapse = "\n")
+})
+```
+
+```{r load packages, warning=FALSE, message=FALSE}
+library(data.table)
+
+library(sandwich)
+library(lmtest)
+
+library(stargazer)
+library(knitr)
+
+library(ggplot2)
+library(patchwork)
+
+library(foreign)
+inline_reference <- "r inline_reference"
+```
+
+\tableofcontents
+\newpage
+
+```{r, child='./questions/question_1.Rmd'}
+```
+
+\newpage
+
+```{r, child='./questions/question_2.Rmd'}
+```
+
+\newpage
+
+```{r, child='./questions/question_3.Rmd'}
+```
+
+\newpage
+
+```{r, child='./questions/question_4.Rmd'}
+```

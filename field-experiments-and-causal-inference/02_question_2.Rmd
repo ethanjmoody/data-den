@@ -1,0 +1,51 @@
+# Multifactor Experiments 
+
+```{r load packages - question 2 instance, warning=FALSE, message=FALSE}
+library(data.table)
+
+library(sandwich)
+library(lmtest)
+
+library(stargazer)
+library(knitr)
+
+library(ggplot2)
+library(patchwork)
+
+library(foreign)
+inline_reference <- "r inline_reference"
+```
+
+```{problem_description}
+Continue to use the same experiment setup from problem 1.  Now think about multifactor experiments. 
+```
+
+## Experiment design? 
+What is the full experimental design for this experiment?  Tell us the dimensions, such as 2x2x3. The full results appear in Panel 4B. We'll note that the dimensions of an experiment are defined in terms of the *treatments that the experiment assigns*, not in terms of other features about the data.  
+
+**Answer:** The full experimental design for this experiment (specifically, the "Participation Intensity Study" referred to in question 1 of this problem set) is a little nuanced. On the surface, it appears to be a *3x3 multifactor between-subjects experiment* (where comparisons are drawn between control/treatment groups and also across pre-/post-measures of recycling behaviors). However, there's also something *extra* going on with the "has cell phone" variable, as described below. The study outlines three possibilities for the first treatment condition (recycling bins): (1) receiving a bin with an informative sticker, (2) receiving a bin without an informative sticker, or (3) receiving no bin. It also outlines three possibilities for the second treatment condition (text/SMS messages): (1) receiving a generic SMS reminder message, (2) receiving a personalized SMS reminder message, or (3) receiving no SMS reminder message. That initially gives us solid grounds to consider the design a 3x3, with 9 possible experimental groups. But wait, there's more! The authors mention that they evaluated results across households having a cell phone and households not having a cell phone (with roughly 50% of the total household sample providing valid cell phone numbers). Since the possession of a cell phone is not technically an experimental *treatment variable* (though it's certainly logically connected to the text/SMS message treatment variable), it's not counted in that 3x3 design descriptor above. However, as shown in Table 4C on p. 23, the authors' proposed "fully saturated" model lists out a few additional experimental groups/conditions that are formed by a portion of participating households having no cell phone. This leads me to believe they conceived of more distinct experimental groups/conditions in the study than just 9 (3x3) and that we should, too. If we account for the "has cell phone" variable then, we might say the "best" representation/descriptor of the full design is a **3x3 between-subjects experiment for households with a cell phone** and a **3x1 (3-level) between-subjects experiment for households without a cell phone** (which gives us something like 12 distinct experimental groups in total). Tricky!
+
+## Baseline for interpretation
+In the results of Table 4B, describe the baseline category. That is, in English, how would you describe the attributes of the group of people for whom all dummy variables are equal to zero?  
+
+**Answer:** The group of people for whom all dummy (indicator) variables are equal to zero could be described as a sort of "pure" control group (across all treatment conditions). This "baseline category" represents *households that do not receive a recycling bin, do not receive a text/SMS message, and also do not have a cell phone*.
+
+## Bin without sticker effect
+In column (1) of Table 4B, interpret the magnitude of the coefficient on "bin without sticker."  What does it mean?  
+
+**Answer:** In Column 1 of Table 4B, the coefficient on "Bin without sticker" is 0.035. This coefficient means that when a household received a recycling bin without a sticker, the percentage of visits in which it turned in a bag was --- on average --- 3.5% higher than the baseline category/group.
+
+## With or without a sticker? 
+In column (1) of Table 4B, which seems to have a stronger treatment effect, the recycling bin with message sticker, or the recycling bin without sticker?  How large is the magnitude of the estimated difference?  
+
+**Answer:** Based on Column 1 of Table 4B, the recycling bin with a sticker appears to have a stronger treatment effect than the recycling bin without a sticker. The coefficient on "Bin with sticker" is 0.055, while the coefficient on "Bin without sticker" is 0.035. The magnitude of the estimated difference between these two conditions is 0.055 - 0.035 = 0.020, or 2.0% points.
+
+## Statistical significantly different with or without a sticker? 
+Is this difference you just described statistically significant?  Explain which piece of information in the table allows you to answer this question.  
+
+**Answer:** No, this difference is *not* statistically significant. The F-test p-value for (1) = (2) toward the bottom of Table 4B shows the result of an F-test between the coefficients for these two variables ("Bin with sticker" and "Bin without sticker"). Because the resulting p-value is 0.31 (which is not less than the customary significance threshold of 0.05), we can conclude that the coefficients are statistically the same and that the difference between them may be simply due to random chance.
+
+## Fully saturated?
+Notice that Table 4C is described as results from "fully saturated" models.  What does this mean? What does David Reiley propose this definition means to him in the async lecture? What do the authors seem to think it means to them? Looking at the list of variables in the table, explain in what sense the model is "saturated."  
+
+**Answer:** According to David Reiley's proposed definition in the async lecture, a "fully saturated" model is one in which each value of a covariate gets a different dummy variable to represent it (allowing the model to be fully non-linear). When multiple covariates are included, a "fully saturated" model would need to include all possible interactions between the dummy variables representing each value of each covariate. In a footnote at the bottom of Table 4C on p. 23 of the paper, the authors state that the results shown in the table represent a "fully saturated" model, which they suggest is a model "with indicators for each unique combination of *treatments*" (*emphasis added*). This is an interesting --- albeit slightly subtle --- departure from Reiley's definition; the authors do *not* make any mention of indicators for covariate values, but only mention indicators for treatment values. Looking at the list of variables in the table, the model they propose appears to be "saturated" in the sense of including every combination of treatment variables: recycling bins (with sticker, without sticker, or none), SMS messages (generic message, personal message, or none), and cell phone possession (yes or no). However, their model does not have a different dummy variable representing each unique value of each unique covariate included in their analysis --- and (arguably) nor should it, since the pre-treatment baseline variables (which could be considered covariates) are continuous variables that would wildly "blow up" the terms in the model if assigned to individual dummy indicators.

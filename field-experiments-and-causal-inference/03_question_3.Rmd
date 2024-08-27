@@ -1,0 +1,219 @@
+# Fun with the placebo
+
+```{problem_description}
+The table below summarizes the data from a political science experiment on voting behavior. Subjects were randomized into three groups: a baseline control group (not contacted by canvassers), a treatment group (canvassers attempted to deliver an encouragement to vote), and a placebo group (canvassers attempted to deliver a message unrelated to voting or politics).
+```
+
+```{r, echo=FALSE}
+summary_table <- data.table(
+  'Assignment' = c('Baseline', 'Treatment', 'Treatment', 'Placebo', 'Placebo'), 
+  'Treated?'   = c('No', 'Yes', 'No', 'Yes', 'No'), 
+  'N'          = c(2463, 512, 1898, 476, 2108), 
+  'Turnout'    = c(.3008, .3890, .3160, .3002, .3145)
+)
+
+kable(summary_table)
+``` 
+
+## Make data
+Construct a data set that would reproduce the table. (Too frequently we receive data that has been summarized up to a level that is not useful for our analysis. Here, we're asking you to "un-summarize" the data to conduct the rest of the analysis for this question.)
+
+```{r construct placebo data, include=TRUE}
+
+# Generate unsummarized data - part 1: define key values from problem setup
+base_n                <- 2463
+base_torate           <- 0.3008
+base_voted            <- round(base_n * base_torate, 0)
+treat_dosed_n         <- 512
+treat_dosed_torate    <- 0.3890
+treat_dosed_voted     <- round(treat_dosed_n * treat_dosed_torate, 0)
+treat_nondosed_n      <- 1898
+treat_nondosed_torate <- 0.3160
+treat_nondosed_voted  <- round(treat_nondosed_n * treat_nondosed_torate, 0)
+plac_dosed_n          <- 476
+plac_dosed_torate     <- 0.3002
+plac_dosed_voted      <- round(plac_dosed_n * plac_dosed_torate, 0)
+plac_nondosed_n       <- 2108
+plac_nondosed_torate  <- 0.3145
+plac_nondosed_voted   <- round(plac_nondosed_n * plac_nondosed_torate, 0)
+total_n               <- 2463 + 512 + 1898 + 476 + 2108
+
+# Generate unsummarized data - part 2: create table and experimental groups
+d <- data.table(
+  Assignment = c(
+    rep("Baseline", base_n),
+    rep("Treatment", treat_dosed_n + treat_nondosed_n),
+    rep("Placebo", plac_dosed_n + plac_nondosed_n)),
+  Treated = c(
+    rep("No", base_n),
+    rep("Yes", treat_dosed_n),
+    rep("No", treat_nondosed_n),
+    rep("Yes", plac_dosed_n),
+    rep("No", plac_nondosed_n)),
+  Voted = c(
+    rep(c(1, 0), times = c(base_voted, base_n - base_voted)),
+    rep(c(1, 0), times = c(treat_dosed_voted, treat_dosed_n - treat_dosed_voted)),
+    rep(c(1, 0), times = c(treat_nondosed_voted, treat_nondosed_n - treat_nondosed_voted)),
+    rep(c(1, 0), times = c(plac_dosed_voted, plac_dosed_n - plac_dosed_voted)),
+    rep(c(1, 0), times = c(plac_nondosed_voted, plac_nondosed_n - plac_nondosed_voted)))
+)
+
+# Generate unsummarized data - part 3: shuffle rows and add ID's
+shuffled_rows_d <- sample(nrow(d))
+d               <- d[shuffled_rows_d, ID := seq_len(total_n)]
+d               <- d[order(ID)]
+
+# Generate unsummarized data - part 4: reorder columns
+setcolorder(d, c("ID", "Assignment", "Treated", "Voted"))
+
+# Reproduce summarized data
+d_summary <- d[, .(N = .N , Turnout = round(sum(Voted) / .N, 4)),
+               keyby = .(Assignment, Treated)][order(match(Assignment, c(
+                 "Baseline", "Treatment", "Placebo")), -Treated)]
+
+# Display summarized data as a QC check
+kable(d_summary)
+
+```
+
+## Estimate the compliance rate using the treatment group
+Estimate the proportion of compliers by using the data on the treatment group.  Provide a short narrative using inline R code, such as `r inline_reference`.  
+
+```{r treatment group compliance rate, include=TRUE}
+
+# Calculate compliance rate for treatment group
+compliance_rate_t <- d[Assignment == "Treatment" & Treated == "Yes", sum(.N)] /
+                     d[Assignment == "Treatment", sum(.N)]
+
+# Display compliance rate for treatment group
+print(compliance_rate_t)
+
+```
+
+**Answer:** The compliance rate for the treatment group represents the proportion of all subjects in the treatment group who were actually treated (i.e., canvassers delivered an encouragement to vote). To compute this rate, we take `r d[Assignment == "Treatment" & Treated == "Yes", sum(.N)]` (the number of subjects in the treatment group who received treatment) and divide it by `r d[Assignment == "Treatment", sum(.N)]` (the total number of subjects in the treatment group), which is equal to approximately `r round(compliance_rate_t, 4)` (or `r round(compliance_rate_t, 4) * 100`%). This value indicates a fairly low compliance rate and actually suggests that a larger percentage of subjects in the treatment group were *not* compliers than were compliers.
+
+## Estimate the compliance rate using the control group
+C. Estimate the proportion of compliers by using the data on the placebo group.  Provide a short narrative using inline R code.
+
+```{r placebo group compliance rate, include=TRUE}
+
+# Calculate compliance rate for placebo group
+compliance_rate_p <- d[Assignment == "Placebo" & Treated == "Yes", sum(.N)] /
+                     d[Assignment == "Placebo", sum(.N)]
+
+# Display compliance rate for placebo group
+print(compliance_rate_p)
+
+```
+
+**Answer:** The compliance rate for the placebo group represents the proportion of all subjects in the placebo group who were actually treated (i.e., canvassers delivered a message unrelated to voting or politics). To compute this rate, we take `r d[Assignment == "Placebo" & Treated == "Yes", sum(.N)]` (the number of subjects in the placebo group who received treatment) and divide it by `r d[Assignment == "Placebo", sum(.N)]` (the total number of subjects in the placebo group), which is equal to approximately `r round(compliance_rate_p, 4)` (or `r round(compliance_rate_p, 4) * 100`%). Just like for the treatment group, this value indicates a fairly low compliance rate and actually suggests that a larger percentage of subjects in the placebo group were *not* compliers than were compliers.
+
+## Compare these compliance rates
+Are the two compliance rates statistically significantly different from each other? Provide *a test* -- this means that you cannot simply "look at" or "eyeball" the coefficients and infer some conclusion -- and a description about why you chose that particular test, and why you chose that particular set of data. 
+
+```{r proportions difference, include=TRUE}
+
+# Run test to check if compliance differs significantly between treatment/placebo
+proportions_difference_test <- prop.test(
+  c(d[Assignment == "Treatment" & Treated == "Yes", sum(.N)],
+    d[Assignment == "Placebo" & Treated == "Yes", sum(.N)]),
+  c(d[Assignment == "Treatment", sum(.N)],
+    d[Assignment == "Placebo", sum(.N)]))
+
+# Display results from proportions difference test
+proportions_difference_test
+
+```
+
+**Answer:** Based on a two-groups proportions test, the difference between the treatment group compliance rate of `r round(compliance_rate_t, 4)` and the placebo group compliance rate of `r round(compliance_rate_p, 4)` *is* statistically significant (p = `r proportions_difference_test$p.value`). The R documentation on prop.test states that this test "can be used for testing the null that the proportions (probabilities of success) in several groups are the same", which forms an appropriate hypothesis and basis for our comparison of the two compliance rates (as we want to check if these rates are, in fact, statistically equivalent or different). The test we're running above takes four inputs: (1) the number of subjects in the treatment group who complied with (actually received) the treatment, (2) the number of subjects in the placebo group who complied with (actually received) the placebo treatment, (3) the total number of subjects in the treatment group, and (4) the total number of subjects in the placebo group. Inputs (1) and (3) are used to compute the proportion of treatment subjects who complied, while inputs (2) and (4) are used to compute the proportion of placebo subjects who complied. With this data, the proportions test can determine if the two proportions are/are not sufficiently different from each other and, like other between-groups tests, provide an estimate of the probability (p-value) of obtaining a difference between these proportions that's at least as extreme as the difference we observe.
+
+## Evaluate assumptions
+What critical assumption does this comparison of the two groups' compliance rates test? Given what you learn from the test, how do you suggest moving forward with the analysis for this problem? 
+
+**Answer:** This comparison tests for potential asymmetry in the approaches (e.g., message delivery styles, neighborhood/demographic bias, etc.) taken by the canvassers for households within the treatment and placebo groups, or other indicators of "impure" randomization. A critical assumption for unbiased estimation of the $CACE$ in a placebo study is that the treatment and placebo messages produce an equivalent set of compliers. We would hope to see the *same* rate of successful message delivery across both our treatment and placebo groups (or at least a non-statistically significant difference between the rate in each group) if households were, in fact, randomly assigned to these experimental groups. This two-groups proportions test provides evidence to suggest that we actually do *not* see the same compliance rate across the groups (i.e., they're significantly different), and that there could be some meaningful differences in how the canvassers approached the treatment households vs. placebo households and delivered the message, or in the types of neighborhoods involved in the treatment vs. placebo groups. Based on this finding, I would recommend proceeding with caution for the remainder of the analysis; it may not provide us with an unbiased estimate of the $CACE$, or with a precise/clear indication of the treatment effect from the encouragement to vote on its own.
+
+## Compliers average treatement effect... of the placebo?
+Estimate the CACE of receiving the placebo. Is the estimate consistent with the assumption that the placebo has no effect on turnout?
+
+```{r cace of placebo, include=TRUE}
+
+# Calculate estimated ITT of placebo group
+itt_estimate  <- d[Assignment == "Placebo", mean(Voted)] -
+                 d[Assignment == "Baseline", mean(Voted)]
+
+# Calculate estimated CACE of placebo group
+cace_estimate <- itt_estimate / compliance_rate_p
+
+# Display estimated CACE of placebo group
+print(cace_estimate)
+
+```
+
+**Answer:** The $CACE$ of receiving the placebo is approximately `r round(cace_estimate, 4)`. This value does not *appear* to be the same as zero, suggesting (at least on the surface) that it's *inconsistent* with the assumption that the placebo has no effect on turnout; however, in order to tell for certain, we'd first need to calculate the robust standard error of the $CACE$ estimate and then run a hypothesis test, like a t-test, to check if the probability of obtaining this estimate is sufficiently small (e.g., <5% or <0.05) under the assumption that the null hypothesis of "no difference from zero" is actually true. If the result we obtained above *did* register as significantly different from zero, we could conclude that the placebo messaging itself is actually affecting voter turnout. For example, perhaps the placebo messaging is related in some way to a political candidate's platform and ultimately inspires some households to vote for that candidate. Or, perhaps there are randomization/design issues with the study, like the canvassers taking different approaches for treatment households vs. placebo households. Either way, if our hypothesis test yielded significance, it would be reasonable to suspect that one or more of these factors might be causing the placebo to have *some* meaningful effect on turnout; otherwise, without significance, we could conclude that the placebo $CACE$ is consistent with the assumption that the messaging has no effect on turnout (as expected).
+
+## Diference in means estimator
+Using a difference in means (i.e. not a linear model), compute the ITT using the appropriate groups' data. Then, divide this ITT by the appropriate compliance rate to produce an estiamte the CACE.  Provide a short narrative using inline R code.    
+
+```{r cace through means, include=TRUE}
+
+# Calculate estimated ITT
+itt        <- d[Assignment == "Treatment", mean(Voted)] -
+              d[Assignment == "Baseline", mean(Voted)]
+
+# Calculate estimated CACE
+cace_means <- itt / compliance_rate_t
+
+# Display estimated CACE
+print(cace_means)
+
+```
+
+**Answer:** Using a difference in means approach, the $CACE$ of receiving the treatment is approximately `r round(cace_means, 4)`. This value suggests that the treatment *does* have a positive, non-zero effect on turnout.
+
+## Linear model estimator
+Use two separate linear models to estimate the CACE of receiving the treatment by first estimating the ITT and then dividing by $ITT_{D}$. Use the `coef()` extractor and in line code evaluation to write a descriptive statement about what you learn after your code. 
+
+```{r itt / d, include=TRUE}
+
+# Create model to generate ITT
+itt_model   <- d[, lm(Voted ~ Assignment)]
+
+# Create model to generate ITT_D
+# NOTE: `Treated` variable first needs to be transformed to have integer/numeric data
+itt_d_model <- d[, lm(ifelse(Treated == "Yes", 1, 0) ~ Assignment)]
+
+# Display ITT and ITT_D
+paste("ITT:", round(coef(itt_model)[3], 4))
+paste("ITT_D:", round(coef(itt_d_model)[3], 4))
+
+# Calculate estimated CACE using ITT and ITT_D
+cace_models <- coef(itt_model)[3] / coef(itt_d_model)[3]
+
+# Display estimated CACE
+paste("CACE:", round(cace_models, 4))
+
+```
+
+**Answer:** Based on this linear model approach, the $CACE$ of receiving the treatment is approximately `r round(cace_models, 4)`, which is identical to what we observed when calculating the $CACE$ using a difference in means estimator. As stated previously, this value suggests that the canvassers' message (one that encouraged subjects to vote) *does* have a positive effect on voting behavior.
+
+## Data subset estimator
+When a design uses a placebo group, one additional way to estiamte the CACE is possible -- subset to include only compliers in the treatment and placebo groups, and then estimate a linear model. Produce that estimate here. Provide a short narrative using inline R code.  
+
+```{r cace subset, include=TRUE} 
+
+# Create model to generate CACE estimate through subsetting data to compliers 
+cace_subset_model <- d[(Assignment == "Treatment" & Treated == "Yes") |
+                       (Assignment == "Placebo" & Treated == "Yes"),
+                       lm(Voted ~ Assignment)]
+
+# Display estimated CACE
+print(round(coef(cace_subset_model)[2], 4))
+
+```
+
+**Answer:** Based on this data subset approach, the $CACE$ of receiving the treatment is approximately `r round(coef(cace_subset_model)[2], 4)`. Just like for the previous approach, this result suggests that the canvassers' message (one that encouraged subjects to vote) *does* have a positive effect on voting behavior when this message is actually delivered to those subjects intended to receive it. However, the $CACE$ estimate using this method differs by `r round(coef(cace_subset_model)[2], 4)` - `r round(cace_models, 4)` = `r round(coef(cace_subset_model)[2], 4) - round(cace_models, 4)` from the previous method. This finding is consistent with the fact that we observed a significant difference in compliance rates between the treatment and placebo groups --- and given this significant difference, we'd expect to see some bias in an approach that looks at the effect of the messaging for both of these groups. In other words, this data subset estimator method may not always yield the same $CACE$ estimate as the difference in means estimator method or linear model estimator method, especially in situations (like this one) when there could be unintentional design/experimental execution issues at play (e.g., randomization issues, approach differences, etc.).
+
+## Evaluate estimators
+In large samples (i.e. "in expectation") when the design is carried out correctly, we have the expectation that the results from 7, 8, and 9 should be the same. Are they? If so, does this give you confidence that these methods are working well. If not, what explains why these estimators are producing different estimates? 
+
+**Answer:** The results from questions 7 and 8 are identical, but are *not* the same for 9. The dissimilarity between the first/second estimate and the third estimate actually doesn't surprise me, since we observed a statistically significant difference between the treatment and placebo group compliance rates when we ran a two-groups proportions test earlier. Given this significant difference in compliance rates, we concluded that there *could* be some meaningful differences in how the canvassers approached the treatment households vs. placebo households and delivered their respective messages in this experiment, or in the types of neighborhoods canvassed for the treatment group and placebo group, or in how randomization of households to experimental groups was conducted in general, etc. Without an equivalent set of compliers across these groups, we actually don't meet a critical assumption for *unbiased estimation of the* $CACE$; instead, we're ultimately left with the possibility that the estimator for the $CACE$ could be biased due to potential design execution issues. This would explain why we see a different value for our third $CACE$ estimate (using a compliers subset approach that accounts for both the treatment and placebo groups), but equivalent values for our first two $CACE$ estimates (using a difference in means approach and a linear model approach that accounts for just the treatment group). If we had seen no significant difference between the treatment/placebo compliance rates when we compared them earlier, we would have expected to see three equivalent $CACE$ estimates for 7, 8, and 9.

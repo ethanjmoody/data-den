@@ -1,0 +1,368 @@
+# Another Turnout Question
+
+```{problem_description}
+We are sorry; it is just that the outcome and treatment spaces are so clear! 
+
+This question allows you to scope the level of difficulty that you want to take on. 
+
+- If you keep the number of rows at 100,000 this is pretty straightforward, and you should be able to complete your work on the ischool.datahub. 
+- But, the real fun is when you toggle on the full dataset; in the full dataset there are about 4,000,000 rows that you have to deal with. This is too many to work on the ischool.datahub. But if you are writing using `data.table` and use a docker image or a local install either on your own laptop or a cloud provider, you should be able to complete this work. 
+
+Hill and Kousser (2015) report that it is possible to increase the probability that someone votes in the California *Primary Election* simply by sending them a letter in the mail. This is kind of surprising, because who even reads the mail anymore anyways? (Actually, if you talk with folks who work in the space, they will say, "We know that everybody throws our mail away; we just hope they see it on the way to the garbage.")
+
+Can you replicate their findings? Let's walk through them.
+```
+
+```{r}
+number_of_rows <- 100000
+# number_of_rows <- Inf
+
+d <- data.table::fread(
+  input = 'https://people.ischool.berkeley.edu/~d.alex.hughes/data/hill_kousser_analysisFile.csv', 
+  nrows = number_of_rows)
+```
+
+```{problem_description}
+(As an aside, you will note that this takes some time to download. One idea is to save a copy locally, rather than continuing to read from the internet. One problem with this idea is that you might be tempted to make changes to this canonical data; changes that would not be reflected if you were to ever pull a new copy from the source tables. One method of dealing with this is proposed by [Cookiecutter data science](https://drivendata.github.io/cookiecutter-data-science/#links-to-related-projects-and-references).)
+
+Here is what is in that data. 
+
+- `age.bin` a bucketed, descriptive, version of the `age.in.14` variable 
+- `party.bin` a bucketed version of the `Party` variable 
+- `in.toss.up.dist` whether the voter lives in a district that often has close races 
+- `minority.dist` whether the voter lives in a majority minority district, i.e. a majority black, latino or other racial/ethnic minority district 
+- `Gender` voter file reported gender
+- `Dist1-8` congressional and data districts 
+- `reg.date.pre.08` whether the voter has been registered since before 2008 
+- `vote.xx.gen` whether the voter voted in the `xx` general election 
+- `vote.xx.gen.pri` whether the voter voted in the `xx` general primary election 
+- `vote.xx.pre.pri` whether the voter voted in the `xx` presidential primary election 
+- `block.num` a block indicator for blocked random assignment. 
+- `treatment.assign` either "Control", "Election Info", "Partisan Cue", or "Top-Two Info"
+- `yvar` the outcome variable: did the voter vote in the 2014 primary election 
+
+These variable names are horrible. Do two things: 
+
+- Rename the smallest set of variables that you think you might use to something more useful. (You can use `data.table::setnames` to do this.) 
+- For the variables that you think you might use; check that the data makes sense; 
+
+When you make these changes, take care to make these changes in a way that is reproducible. In doing so, ensure that nothing is positional indexed, since the orders of columns might change in the source data). 
+
+While you are at it, you might as well also modify your `.gitignore` to ignore the data folder. Because you are definitely going to have the data rejected when you try to push it to github. And every time that happens, it is a 30 minute rabbit hole to try and re-write git history. 
+```
+
+```{r set names}
+setnames(
+  x = d,
+  old = c("age.in.14", "Party", "Gender", "block.num", "treatment.assign", "yvar"),
+  new = c("age",       "party", "gender", "block",     "treatment",        "vote")
+)
+```
+
+```{r three party labels}
+three_party_labeler <- function(x) { 
+  party <- ifelse(
+    x == 'DEM', 'DEM', 
+    ifelse(
+      x == 'REP', 'REP', 
+      'OTHER'))
+  return(party)
+}
+
+d[ , three_party := three_party_labeler(party)]
+```
+
+```{r treatment factors} 
+d[ , treatment_f := factor(treatment)]
+d[ , any_letter  := treatment_f != 'Control' ]
+```
+
+```{problem_description}
+Let us start by showing some of the features about the data. There are `r format(d[, .N], big.mark = ',')` observations. Of these, 
+`r format(d[party == 'DEM' , .N], big.mark = ',')` identify as Democrats (`r d[ , mean(party == 'DEM')] * 100` percent); 
+`r format(d[party == 'REP', .N], big.mark = ',')`) identify as Republicans (`r d[ , mean(party == 'REP')] * 100` percent); and, 
+`r format(d[!(party %in% c('DEM', 'REP')), .N], big.mark = ',')`) neither identify as Democrat or Republican (`r d[ , mean(!(party %in% c('DEM', 'REP')))] * 100` percent). 
+```
+
+```{r}
+d %>% 
+  ggplot() + 
+  aes(x = age, color = three_party) + 
+  geom_density() + 
+  scale_x_continuous(limits = c(17, 100)) + 
+  labs(
+    title = 'Ages of Party Reporters', 
+    subtitle = 'Republicans have more support among older voters', 
+    x = 'Age', y = 'Percent of Voters', 
+    color = 'Party ID', 
+    caption = '"OTHER" include all party preferences, including No Party Preference.'
+  ) 
+
+```
+
+## Simple treatment effect 
+Load the data and estimate a `lm` model that compares the rates of turnout in the control group to the rate of turnout among anybody who received *any* letter. This model combines all the letters into a single condition -- "treatment" compared to a single condition "control". Report robust standard errors, and include a narrative sentence or two after your code using inline R code, such as `r inline_reference`.  
+
+```{r effect of receiving a letter, message = FALSE, warning = FALSE, include=TRUE, results="asis"} 
+
+# Create linear model to estimate treatment effect of any letter on turnout
+mod_ste      <- d[, lm(vote ~ any_letter)]
+
+# Calculate robust standard errors (RSEs)
+mod_ste_rses <- sqrt(diag(vcovHC(mod_ste)))
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_ste,
+  se = list(mod_ste_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("Treatment = Any Letter", "Yes")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+```
+
+**Answer:** The estimated treatment effect of receiving *any* letter is both non-significant and negligible/near-null. Based on our linear model, this treatment effect is approximately `r round(coef(mod_ste)[2], 4)` --- that is, approximately `r round(coef(mod_ste)[2], 4) * 100`% points different from the control group's voter turnout. This value suggests that voter turnout is only marginally different for the voters who receive *any* letter in the mail than for the control group of voters.
+
+## Letter-specific treatment effects
+Suppose that you want to know whether different letters have different effects. To begin, what are the effects of each of the letters, as compared to control? Estimate an appropriate linear model and use robust standard errors. Provide a short narrative using inline R code. 
+
+```{r effect of receiving specific letters, warning = FALSE, include=TRUE, results="asis"} 
+
+# Create linear model to estimate treatment effects of different letters on turnout
+mod_lte      <- d[, lm(vote ~ treatment)]
+
+# Calculate robust standard errors (RSEs)
+mod_lte_rses <- sqrt(diag(vcovHC(mod_lte)))
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_lte,
+  se = list(mod_lte_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("Treatment = Letter-Specific", "Yes")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+```
+
+**Answer:** There do *appear* to be different treatment effects associated with each type of letter based on the above linear model. However, like before, we don't see statistical significance for *any* of these effects. From the coefficients in our model, we can say the following about the treatment effect of each letter: (1) the effect of the "election info" letter is roughly `r round(coef(mod_lte)[2], 4)` --- that is, approximately `r round(coef(mod_lte)[2], 4) * 100`% points different from the control group's voter turnout; (2) the effect of the "partisan" letter is roughly `r round(coef(mod_lte)[3], 4)` --- that is, approximately `r round(coef(mod_lte)[3], 4) * 100`% points different from the control group's voter turnout; and (3) the effect of the "top-two info" letter is roughly `r round(coef(mod_lte)[4], 4)` --- that is, approximately `r round(coef(mod_lte)[4], 4) * 100`% points different from the control group's voter turnout. These findings suggest that while the "election info" letter *may* actually reduce voter turnout, the "partisan" letter and "top-two info" letter *may* increase voter turnout, with the "top-two info" letter having an even larger effect than the "partisan" letter. That being said, these conclusions should be tempered by the fact that the coefficients from our model are *not* statistically significant and the RSEs could truthfully swing them into either negative, positive, or null (zero) territory.
+
+## Test for letter-specific effects 
+Does the increased flexibilitiy of a different treatment effect for each of the letters improve the performance of the model? Test, using an F-test. What does the evidence suggest, and what does this mean about whether there **are** or **are not** different treatment effects for the different letters?
+
+```{r f-test, include=TRUE}
+
+# Run F-test (ANOVA) to see if letter-specific model shows improved performance
+ftest_ste_lte        <- anova(mod_ste, mod_lte, test = "F")
+
+# Display result of F-test (ANOVA)
+ftest_ste_lte
+
+# Extract and print estimated F-statistic from F-test
+ftest_ste_lte_fstat  <- round(ftest_ste_lte$F[2], 4)
+
+# Extract and print estimated p-value from F-test
+ftest_ste_lte_pvalue <- round(ftest_ste_lte$`Pr(>F)`[2], 4)
+
+# Print F-statistic and p-value from F-test
+paste("Estimated F-statistic:", ftest_ste_lte_fstat)
+paste("Estimated p-value:", ftest_ste_lte_pvalue)
+
+```
+
+**Answer:** Our F-test suggests that accounting for the specific letter types doesn't yield any meaningful improvement in model fit (amount of variability explained). The two main pieces of evidence for this conclusion are (1) the F-statistic, which is `r ftest_ste_lte_fstat` (very low), and (2) the p-value, which is `r ftest_ste_lte_pvalue` (very high --- ultimately greater than the typical significance threshold of 0.05). This means that even though the coefficients appear to differ for each letter type in our letter-specific model, we must ultimately conclude that there *are not* (statistically) different treatment effects for the different letters.
+
+## Compare letter-specific effects 
+Is one message more effective than the others? The authors have drawn up this design as a full-factorial design. Write a *specific* test for the difference between the *Partisan* message and the *Election Info* message. Write a *specific* test for the difference between *Top-Two Info* and the *Election Info* message. Report robust standard errors on both tests and include a short narrative statement after your estimates. 
+
+```{r specific treatment effects, warning = FALSE, include=TRUE, results="asis"}
+
+# Create copy of original data.table for editing
+d_cpy               <- copy(d)
+
+# Subset copied data.table into individual groups for pairwise comparisons
+d_cpy_pm_em         <- d_cpy[(treatment == "Partisan" | treatment == "Election info"),
+                             c("treatment", "vote"), with = FALSE]
+d_cpy_tm_em         <- d_cpy[(treatment == "Top-two info" | treatment == "Election info"),
+                             c("treatment", "vote"), with = FALSE]
+
+# Create linear model to check for difference between `Partisan` and `Election info`
+mod_diff_pm_em      <- d_cpy_pm_em[, lm(vote ~ treatment)]
+
+# Calculate robust standard errors (RSEs)
+mod_diff_pm_em_rses <- sqrt(diag(vcovHC(mod_diff_pm_em)))
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_diff_pm_em,
+  se = list(mod_diff_pm_em_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("Treatments Compared", "Partisan, Election info")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+# Create linear model to check for difference between `Top-two info` and `Election info`
+mod_diff_tm_em      <- d_cpy_tm_em[, lm(vote ~ treatment)]
+
+# Calculate robust standard errors (RSEs)
+mod_diff_tm_em_rses <- sqrt(diag(vcovHC(mod_diff_tm_em)))
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_diff_tm_em,
+  se = list(mod_diff_tm_em_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("Treatments Compared", "Top-two info, Election info")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+```
+
+**Answer:** To test if one message is more effective than the others, we can subset the original data into paired groups of treatments (e.g., "partisan" and "election info", "top-two info" and "election info") and then run a linear model that regresses voter turnout on treatment message. Doing so (above) results in a series of tables showing the coefficients/effects of a particular treatment message and the constant term, representing the other treatment message included in the pairwise test. For example, the first table shows the outcome of the comparison between "partisan" and "election info", with "election info" representing the constant term; meanwhile, the second table shows the outcome of the comparison between "top-two info" and "election info", with "election info" again representing the constant term. *The conclusion I draw from both tests is that there is no statistically significant difference between the "partisan" and "election info" effects and between the "top-two info" and "election info" effects.* While it's tempting to say that "partisan" messaging is slightly more effective than "election info" messaging, and "top-two info" messaging also is slightly more effective than "election info" messaging (based on the positive coefficients for these treatments in the tables above), we cannot --- in good faith --- conclude that this is a scientifically compelling and statistically significant finding. Rather, given the lack of significance on the coefficients and the reported RSEs, we must say that the apparent differences in effectiveness could be due to chance alone.
+
+## Count the number of blocks
+**Blocks? We don't need no stinking blocks?**  The blocks in this data are defined in the `block.num` variable (which you may have renamed). There are a *many* of blocks in this data, none of them are numerical -- they're all category indicators. How many blocks are there? 
+
+```{r count blocks, include=TRUE}
+
+# Count number of unique `block` values
+d_block_count <- d[, .(unique_blocks = uniqueN(block))]
+
+# Display unique `block` count
+d_block_count
+
+```
+
+**Answer:** There are exactly `r paste(d_block_count)` unique blocks in this 100,000-row subset of data.
+
+## Add block fixed effects
+**SAVE YOUR CODE FIRST** but then try to estimate a `lm` that evaluates the effect of receiving *any letter*, and includes this block-level information. What happens? Why do you think this happens? If this estimate *would have worked* (that's a hint that we don't think it will), what would the block fixed effects have accomplished?
+
+```{r going down with the ship!, eval=FALSE, include=TRUE, results="asis"}
+##
+## SAVE YOUR CODE: before you run the next lines, because it's going 
+##                 to crash you if you're on the ischool.datahub.
+##                 ... but why does it crash you?
+## 
+##  Notice that in the chunk declaration, we have set `eval = FALSE`; this is so the code doesn't run until you ask it to.
+##
+## We'll even write some code that will help.
+##   - In the first chain of this data.table, we are scoping only to the columns that we will use in the model;
+##   - In the second, we are estimating the model
+model_block_fx      <- d[ , .(vote, any_letter, block)][ , lm(vote ~ any_letter + factor(block))]
+
+##############################################################################
+# Calculate robust standard errors (RSEs)
+# NOTE: RAN INTO ISSUES WITH THIS GIVEN NUMBER OF BLOCKS AND SIZE OF DATA
+# model_block_fx_rses <- sqrt(diag(vcovHC(model_block_fx)))
+##############################################################################
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  model_block_fx,
+  #se = list(model_block_fx_rses),
+  omit = "block",
+  add.lines = list(
+    c("Using Robust Standard Errors", "No"),
+    c("Treatment = Letter-Specific", "Yes"),
+    c("Including Block Fixed Effects", "Yes")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+```
+
+**Answer:** The blocked fixed effects model should give us more insight into the degree to which differences in voting turnout might be related to whatever variables were "blocked" on. The documentation above gives us very limited detail on the exact blocking variables, but the published paper from Hill and Kousser (2015) provides more info; it indicates that the researchers "blocked on age, party, individual 2010 and 2008 general election vote history, district competitiveness, and whether or not a district had a plurality or voters from an ethnic or racial minority" (p. 423). Because voting behavior/turnout likely co-varies with or is impacted by these factors (specifically in the sense that, as the paper states, "different parts of the population might be more hindered by different factors of non-participation"), incorporating blocked fixed effects seems like a good way to more precisely estimate the *effect of the treatment messaging* across a wide variety of prospective voters, all while controlling for variables other than that messaging. Generally speaking, including blocked fixed effects should also reduce the error in the model predictions (i.e., lower RSEs/standard error estimates) and improve model precision.
+
+## A clever work-around? 
+Even though we can't estimate this fixed effects model directly, we can get the same information and model improvement if we're *just a little bit clever*. Create a new variable that is the *average turnout within a block* and attach this back to the data.table. Use this new variable in a regression that regresses voting on `any_letter` and this new `block_average`. Then, using an F-test, does the increased information from all these blocks improve the performance of the *causal* model? Use an F-test to check. 
+
+```{r alternate approach, include=TRUE, results="asis"}
+
+# Calculate average voter turnout by `block` and assign to new column `block_average`
+d                           <- d[, block_average := mean(vote), by = block]
+
+# Create linear model to estimate effects of letters (treatment) and blocks (fixed) on turnout
+mod_lte_bfe_wa              <- d[, lm(vote ~ any_letter + block_average)]
+
+# Calculate robust standard errors (RSEs)
+mod_lte_bfe_wa_rses         <- sqrt(diag(vcovHC(mod_lte_bfe_wa)))
+
+# Display stargazer table with model results and RSEs
+stargazer(
+  mod_lte_bfe_wa,
+  se = list(mod_lte_bfe_wa_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes"),
+    c("Treatment = Letter-Specific", "Yes"),
+    c("Block Fixed Effects Proxy (Avg. Turnout)", "Yes")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+# Run F-test (ANOVA) to see if new model shows improved performance
+ftest_ste_lte_bfe_wa        <- anova(mod_ste, mod_lte_bfe_wa, test = "F")
+
+# Display result of F-test (ANOVA)
+ftest_ste_lte_bfe_wa
+
+# Extract and print estimated F-statistic from F-test
+ftest_ste_lte_bfe_wa_fstat  <- round(ftest_ste_lte_bfe_wa$F[2], 4)
+
+# Extract and print estimated p-value from F-test
+ftest_ste_lte_bfe_wa_pvalue <- round(ftest_ste_lte_bfe_wa$`Pr(>F)`[2], 4)
+
+# Print F-statistic and p-value from F-test
+paste("Estimated F-statistic:", ftest_ste_lte_bfe_wa_fstat)
+paste("Estimated p-value:", ftest_ste_lte_bfe_wa_pvalue)
+
+```
+
+**Answer:** This is interesting... Our F-test suggests that incorporating our newly-created `block_average` variable into the regression *does* improve the model fit. The two main pieces of evidence for this conclusion are (1) the F-statistic, which is now practically off-the-charts (!) at a whopping `r ftest_ste_lte_bfe_wa_fstat`, and (2) the p-value, which is so miniscule it registers as `r ftest_ste_lte_bfe_wa_pvalue` (far below the typical significance threshold of 0.05).
+
+## Does cleverness create a bad-control? 
+Doesn't this feel like using a bad-control in your regression? Has the treatment coefficient changed from when you didn't include the `block_average` measure to when you did? Have the standard errors on the treatment coefficient changed from when you didn't include the `block_average` measure to when you did? Why is this OK to do?
+
+```{r compare models, include=TRUE, results="asis"}
+
+# Compare simple any-letter model to our "clever workaround" any-letter model
+stargazer(
+  mod_ste,
+  mod_lte_bfe_wa,
+  se = list(mod_ste_rses, mod_lte_bfe_wa_rses),
+  add.lines = list(
+    c("Using Robust Standard Errors", "Yes", "Yes"),
+    c("Treatment = Letter-Specific", "Yes", "Yes"),
+    c("Block Fixed Effects Proxy (Avg. Turnout)", "No", "Yes")),
+  type = "latex",
+  #type = "text")
+  header = FALSE)
+
+```
+
+**Answer:** My initial inclination was that this approach does *seem* like using a bad control in the regression (but that was not my *final* conclusion). Taking the observed average voter turnout for each block and applying it as a RHS variable in the regression formula (`lm` model call) originally struck me as something we wouldn't want to do to estimate the treatment effect of any letter on voting turnout, since voter turnout is the dependent/outcome variable (a post-treatment variable) in this study. This approach initially felt a bit like "target encoding" in ML, where the modeler encodes a new feature with the average of the target/outcome variable to try to boost the accuracy of their model's predictions --- a practice which is not always advisable and carries some risks. *However, I ultimately think our "clever workaround" is O.K. and does not constitute a bad control in this instance.* The main reason is because the documentation for the data used in this study (included above) states that the `block.num` represents "a block indicator for blocked random assignment." Assuming block random assignment (randomization) was executed cleanly, we can feel confident that average voter turnout within each block does not systematically differ across or co-vary with the various treatment/election letter groups. That keeps it from being a bad control and instead makes it a useful control variable. It's interesting to see that neither the treatment coefficient nor the RSE for `any_letter` changes within our "clever workaround" model compared to our original "simple" causal model. However, the constant term definitely changes; virtually all of the "signal" within that term is now pulled into the coefficient for `block_average` and what's left is a value that's essentially zero (i.e., not statistically significant from zero). What seems to be happening here --- if I'm interpreting the coefficients in the table correctly and the context of the problem setup --- is that, when we incorporate the `block_average` variable, this helps us control for existing voter behavior (or turnout tendencies, obstacles, etc.) within each "block". The `any_letter` variable shows the marginal/additional increase in voter turnout (beyond what already exists within each block) generated by sending any type of letter with election-related messaging. In other words, the `any_letter` coefficient represents the additional turnout expected *on top of* what's already expected within each block. And, as it turns out, the *blocks* --- not the treatment letters --- end up explaining most of the differences in turnout. This result suggests that the marginal/additional effect of letters on turnout is quite small from a pure percentage point standpoint --- only `r round(coef(mod_lte_bfe_wa)[2], 4) * 100`% points different from the control group with blocked fixed effects accounted for --- and statistically non-significant. Granted, this is a *positive* number, but it's still small... Perhaps this is what Hill and Kousser (2015) meant by claiming it's possible to *increase* the probability that someone votes in the California primary election simply by sending them a letter in the mail. The final model coefficients *do* (technically) seem to support that claim, though it's difficult to put a lot of faith in the conclusion given the observed non-significant results. (Based on the published paper, it seems like the additional data the authors used --- beyond the first 100,000 records featured in this assignment --- establishes a more pronounced treatment effect with actual statistical significance.) However, I acknowledge that in tight elections, a small but *positive* anticipated turnout increase might carry a substantive degree of *practical* importance to political scientists, researchers, and politicians. Indeed, I could see the findings from this research still being significant in the "how to boost civic engagement in elections" sense, which certainly matters practically.
+
+```{r plot assessing good/bad control, include=TRUE}
+setkeyv(x = d, cols = 'block')
+
+d[block > 0 , .(
+      prop_control  = mean(treatment_f == 'Control'), 
+      prop_info     = mean(treatment_f == 'Election info'), 
+      prop_top_two  = mean(treatment_f == 'Top-two info'), 
+      prop_partisan = mean(treatment_f == 'Partisan')), 
+    keyby = .(block)] %>% 
+  melt(data = ., id.vars = 'block') %>% 
+    ggplot() + 
+      aes(x = block, y = value, color = variable) + 
+      geom_point() + 
+      facet_wrap(facets = vars(variable), nrow = 2, ncol = 2, scales = 'free')
+```

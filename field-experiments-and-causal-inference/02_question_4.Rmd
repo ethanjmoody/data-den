@@ -1,0 +1,247 @@
+# A Final Practice Problem 
+
+```{r load packages - question 4 instance, warning=FALSE, message=FALSE}
+library(data.table)
+
+library(sandwich)
+library(lmtest)
+
+library(stargazer)
+library(knitr)
+
+library(ggplot2)
+library(patchwork)
+
+library(foreign)
+inline_reference <- "r inline_reference"
+```
+
+```{problem_description}
+Now for a fictional scenario. An emergency two-week randomized controlled trial of the experimental drug ZMapp is conducted to treat Ebola. (The control represents the usual standard of care for patients identified with Ebola, while the treatment is the usual standard of care plus the drug.) 
+
+Here are the (fake) data. 
+```
+
+```{r read data}
+d <- fread("../data/ebola_rct2.csv")
+head(d)
+```
+
+```{problem_description}
+You are asked to analyze it. Each patient has their temperature and whether they are dehydrated recorded on day 0 of the experiment, then ZMapp is administered to patients in the treatment group on day 1. Dehydration and temperature is again recorded on day 14.
+```
+
+## Simple treatment effect of Zmapp
+Without using any covariates, answer this question with regression: What is the estimated effect of ZMapp (with standard error in parentheses) on whether someone was dehydrated on day 14? What is the p-value associated with this estimate?
+
+```{r dehydration model, include=TRUE}
+# Create linear model of ZMapp treatment against day 14 dehydration indicator
+zmapp_1 <- d[, lm(
+  dehydrated_day14 ~ treat_zmapp)]
+
+# Store model summary results
+zmapp_1_summary <- summary(zmapp_1)
+
+# Display result/summary of model
+# zmapp_1_summary
+
+# Extract and print estimated effect value from model
+zmapp_1_summary_effect <- round(zmapp_1_summary$coefficients[2], 4)
+paste("Estimated Effect:", zmapp_1_summary_effect)
+
+# Extract and print estimated standard error value from model
+zmapp_1_summary_serror <- round(zmapp_1_summary$coefficients[4], 4)
+paste("Estimated Standard Error:", zmapp_1_summary_serror)
+
+# Extract and print estimated p-value from model
+zmapp_1_summary_pvalue <- round(zmapp_1_summary$coefficients[8], 4)
+paste("Estimated p-value:", zmapp_1_summary_pvalue)
+```
+
+**Answer:** The estimated effect of ZMapp on whether someone was dehydrated on day 14 is `r zmapp_1_summary_effect` (`r zmapp_1_summary_serror`), with the standard error noted in parentheses. The p-value associated with this estimate is `r zmapp_1_summary_pvalue`, which is significant at the 1% level.
+
+## Add baseline covariates
+Add covariates for dehydration on day 0 and patient temperature on day 0 to the regression from part (a) and report the ATE (with standard error). Also report the p-value.
+
+```{r add pre-treatment measures, include=TRUE}
+# Expand linear model to include covariates for day 0 dehydration and temperature
+zmapp_2 <- d[, lm(
+  dehydrated_day14 ~ treat_zmapp + dehydrated_day0 + temperature_day0)]
+
+# Store model summary results
+zmapp_2_summary <- summary(zmapp_2)
+
+# Display result/summary of model
+# zmapp_2_summary
+
+# Extract and print estimated effect value from model
+zmapp_2_summary_effect <- round(zmapp_2_summary$coefficients[2], 4)
+paste("Estimated Effect:", zmapp_2_summary_effect)
+
+# Extract and print estimated standard error value from model
+zmapp_2_summary_serror <- round(zmapp_2_summary$coefficients[6], 4)
+paste("Estimated Standard Error:", zmapp_2_summary_serror)
+
+# Extract and print estimated p-value from model
+zmapp_2_summary_pvalue <- round(zmapp_2_summary$coefficients[14], 4)
+paste("Estimated p-value:", zmapp_2_summary_pvalue)
+```
+
+**Answer:** With covariates for dehydration on day 0 and patient temperature on day 0 included in the model, the estimated effect of ZMapp on whether someone was dehydrated on day 14 is `r zmapp_2_summary_effect` (`r zmapp_2_summary_serror`), with the standard error noted in parentheses. The p-value associated with this estimate is `r zmapp_2_summary_pvalue`, which is significant at the 5% level.
+
+## Interpret estimates 
+Do you prefer the estimate of the ATE reported in the chunk called `dehydration model` or `add pre-treatment measures`? Why? Report the results of the F-test that you used to form this opinion. 
+
+```{r test pre-treatment variable inclusion, include=TRUE}
+# Run ANOVA to perform an F-test between previous two models
+zmapp_test_object <- anova(zmapp_1, zmapp_2, test = "F")
+
+# Display result of F-test (ANOVA)
+zmapp_test_object
+
+# Extract and print estimated F-statistic from F-test
+zmapp_test_object_fstat <- round(zmapp_test_object$F[2], 4)
+paste("Estimated F-statistic:", zmapp_test_object_fstat)
+
+# Extract and print estimated p-value from F-test
+zmapp_test_object_pvalue <- round(zmapp_test_object$`Pr(>F)`[2], 10)
+paste("Estimated p-value:", zmapp_test_object_pvalue)
+```
+
+**Answer:** An F-test (ANOVA) between the two linear models produces an F-statistic value of `r zmapp_test_object_fstat` and a highly significant p-value (at more than the 0.1% level) of `r zmapp_test_object_pvalue`. These results indicate that we should reject the null hypothesis and conclude that there *is* evidence to suggest a significant difference between our alternative model's ability to explain the variance in the outcome variable and our base/original model's ability to do so. Practically, this means that the inclusion of additional predictors/covariates in our alternative model --- the second one we produced --- ultimately helped improve that model's "fit" (the closeness of its predictions to actual observed values) relative to our original model. In other words, certain pre-treatment (day 0) measures --- specifically patient temperature (given the significant p-value observed for this variable's coefficient in our second model) --- appear to be highly predictive of post-treatment (day 14) patient dehydration. Based on these results, I prefer the estimate of the ATE reported by our alternative/second model more than our original/first model.
+
+## Add day fourteen temperature 
+The regression from part `add pre-treatment measures` suggests that temperature is highly predictive of dehydration. Add, temperature on day 14 as a covariate and report the ATE, the standard error, and the p-value.
+
+```{r add day 14 temperature, include=TRUE}
+# Expand linear model to include an additional covariate for day 14 temperature
+zmapp_3 <- d[, lm(
+  dehydrated_day14 ~ treat_zmapp + dehydrated_day0 + temperature_day0 + temperature_day14)]
+
+# Store model summary results
+zmapp_3_summary <- summary(zmapp_3)
+
+# Display result/summary of model
+# zmapp_3_summary
+
+# Extract and print estimated effect value from model
+zmapp_3_summary_effect <- round(zmapp_3_summary$coefficients[2], 4)
+paste("Estimated Effect:", zmapp_3_summary_effect)
+
+# Extract and print estimated standard error value from model
+zmapp_3_summary_serror <- round(zmapp_3_summary$coefficients[7], 4)
+paste("Estimated Standard Error:", zmapp_3_summary_serror)
+
+# Extract and print estimated p-value from model
+zmapp_3_summary_pvalue <- round(zmapp_3_summary$coefficients[17], 4)
+paste("Estimated p-value:", zmapp_3_summary_pvalue)
+```
+
+**Answer:** Now, with an additional covariate for patient temperature on day 14 included in the model, the estimated effect of ZMapp on whether someone was dehydrated on day 14 is `r zmapp_3_summary_effect` (`r zmapp_3_summary_serror`), with the standard error noted in parentheses. The p-value associated with this estimate is `r zmapp_3_summary_pvalue`, which is no longer significant at the 5% or even 10% level.
+
+## Interpret estimates
+Do you prefer the estimate of the ATE reported in part `add pre-treatment measures` or `add day 14 temperature`? What is this preference based on? 
+
+**Answer:** I prefer the estimate of the ATE reported in our second model (with only pre-treatment covariates added) over the estimate of the ATE reported in our third model (with a post-treatment covariate added). This is because patient temperature on day 14 could be considered a "bad control" in the third regression model. A bad control is generally defined as a variable that could be affected by the treatment, or could be considered an outcome variable. Including a bad control in a regression --- *especially when it's a post-treatment variable* --- could lead to biased estimates, as the model might attribute some of the "signal" (effect) of the treatment to the bad control variable. In this hypothetical scenario, it'd be reasonable to believe that patients' temperatures on day 14 are affected by taking/not taking the ZMapp drug *and/or by their dehydration at both day 0 and day 14* (or even vice-versa --- it'd be reasonable to believe that patients' dehydration is affected by temperature). Since there are numerous potential causal relationships at play between post-treatment temperature, post-treatment dehydration, and the ZMapp drug, it doesn't actually make sense to treat the post-treatment temperature reading as a predictor of post-treatment dehydration in the regression model.
+
+## Look at temperature
+Now let's switch from the outcome of dehydration to the outcome of temperature, and use the same regression covariates as in the chunk titled `add pre-treatment measures`. Test the hypothesis that ZMapp is especially likely to reduce mens' temperatures, as compared to womens', and describe how you did so. What do the results suggest?
+
+```{r heterogeneous treatment effects, include=TRUE, results="asis"}
+# Create linear model with day 14 temperature outcome and pre-treatment covariates
+zmapp_4 <- d[, lm(
+  temperature_day14 ~ treat_zmapp + dehydrated_day0 + temperature_day0 + male + treat_zmapp*male)]
+
+# Store model summary results
+zmapp_4_summary <- summary(zmapp_4)
+
+# Display result/summary of model
+zmapp_4_summary
+
+# Extract and print estimated effect value from model
+zmapp_4_summary_effect <- round(zmapp_4_summary$coefficients[6], 4)
+paste("Estimated Effect:", zmapp_4_summary_effect)
+
+# Extract and print estimated standard error value from model
+zmapp_4_summary_serror <- round(zmapp_4_summary$coefficients[12], 4)
+paste("Estimated Standard Error:", zmapp_4_summary_serror)
+
+# Extract and print estimated p-value from model
+zmapp_4_summary_pvalue <- round(zmapp_4_summary$coefficients[24], 22)
+paste("Estimated p-value:", zmapp_4_summary_pvalue)
+
+############################################################################
+
+# Alternate method: Partition data into males/females and create separate linear models
+zmapp_4m <- d[male == 1, lm(
+  temperature_day14 ~ treat_zmapp + dehydrated_day0 + temperature_day0)]
+zmapp_4f <- d[male == 0, lm(
+  temperature_day14 ~ treat_zmapp + dehydrated_day0 + temperature_day0)]
+
+# Display output of linear models in stargazer table
+stargazer(
+  zmapp_4m, zmapp_4f,
+  add.lines = list(c("Model for Males Subset", "Yes", "No")),
+  type = "latex",
+  header = FALSE)
+```
+
+**Answer:** To test the hypothesis that ZMapp is especially likely to reduce mens' temperatures as compared to womens' temperatures, I compared two scenarios/tests and evaluated the results: (1) I produced a new linear model including the `male` indicator variable along with the same pre-treatment covariates in our second linear model (above) *and* an interaction term (interacting `treat_zmapp` with `male`), and (2) I ran two separate linear models including the same pre-treatment covariates in our second linear model (above) that are identical to each other apart from their partitioning of the data, with one partitioning the data into males only (`male == 1`) and the other partitioning the data into females only (`male == 0`). The first scenario showed a significant p-value of `r zmapp_4_summary_pvalue` for the interaction term, indicating that being male and receiving the ZMapp treatment significantly impacts patients' post-treatment day 14 temperatures. The second scenario corroborates this finding by showing a *more extreme coefficient* --- that's also more statistically significant --- for `treat_zmapp` for males than for females, as shown in the stargazer output table. The `treat_zmapp` coefficient is statistically significant only at the 10% level for females (which is generally regarded as *non-significant*) versus significant at the <1% level for males. Given these findings, we could say that the hypothesis that ZMapp is especially likely to reduce mens' temperatures as compared to womens' temperatures *appears to be supported* by both the larger `treat_zmapp` coefficient (in absolute terms) for males than females and the greater statistical significance with this value across the two scenarios/tests above. However, as discussed in the answer to the next question, the difference we see for treated mens' temperatures vs. treated womens' temperatures could be affected by other factors --- like their baseline/starting temperatures (which we can infer from the male/female control groups) --- rather than just being driven by some sort of special effectiveness of the drug for men.
+
+## Compare health outcomes
+Which group -- those that are coded as `male == 0` or `male == 1` have better health outcomes (temperature) in control? What about in treatment? How does this help to contextualize whatever heterogeneous treatment effect you might have estimated? 
+
+```{r context for hte, include=TRUE}
+# Compute mean `temperature_day14` grouped by `male` and `treat_zmapp`
+group_means_temp_post <- d[, .(mean_temp14 = mean(temperature_day14)),
+                           keyby = .(male, treat_zmapp)]
+
+# Display group means output
+# group_means_temp_post
+
+# Compute mean `temperature_day14` for female patients in control group
+f_control_mean_temp_post <- d[(male == 0 & treat_zmapp == 0), round(mean(temperature_day14), 4)]
+
+# Compute mean `temperature_day14` for male patients in control group
+m_control_mean_temp_post <- d[(male == 1 & treat_zmapp == 0), round(mean(temperature_day14), 4)]
+
+# Compute mean `temperature_day14` for female patients in treatment group
+f_treat_mean_temp_post   <- d[(male == 0 & treat_zmapp == 1), round(mean(temperature_day14), 4)]
+
+# Compute mean `temperature_day14` for male patients in treatment group
+m_treat_mean_temp_post   <- d[(male == 1 & treat_zmapp == 1), round(mean(temperature_day14), 4)]
+
+# Print `temperature_day14` means for male and female patients in control/treatment groups
+paste("Mean day 14 temperature for female patients in control group:", f_control_mean_temp_post)
+paste("Mean day 14 temperature for male patients in control group:", m_control_mean_temp_post)
+paste("Mean day 14 temperature for female patients in treatment group:", f_treat_mean_temp_post)
+paste("Mean day 14 temperature for male patients in treatment group:", m_treat_mean_temp_post)
+```
+
+**Answer:** Mean patient temperatures at day 14 for males and females across control and treatment groups are shown in the table below:
+
+`r kable(group_means_temp_post)`
+
+These values indicate that patients coded as `male == 0` (females) tend to have better day 14 temperatures in the control group. The mean temperature at day 14 for female patients in the control group is `r f_control_mean_temp_post`; meanwhile, the mean temperature at day 14 for male patients in the control group is `r m_control_mean_temp_post` (pretty different). These values also indicate that patients coded as `male == 0` (females) tend to show much less change in day 14 temperature in the treatment group (on average). The mean temperature at day 14 for female patients in the treatment group is `r f_treat_mean_temp_post` --- not substantially different from the mean temperature for female patients in the control group; meanwhile, the mean temperature at day 14 for male patients in the treatment group is `r m_treat_mean_temp_post` --- certainly different from the mean temperature for male patients in the control group. Based on these mean differences in temperature across male/female and control/treatment groups, we could conclude one of three things: (1) random assignment of patients to control/treatment groups wasn't executed cleanly, and the pronounced difference in mean temperatures across control and treatment groups for males was due to a procedure that was not entirely random (or due to an unlucky accident); (2) the ZMapp treatment actually *does* produce a larger effect on males' temperatures than females' temperatures; or (3) perhaps most likely, the ZMapp treatment is most effective when administered to patients with fevers (temperatures >101 degrees Fahrenheit) and not really effective when administered to patients who don't have fevers (temperatures around 98-99 degrees Fahrenheit). If (1) were true, we'd probably want to run the RCT/experiment a second time --- with a different pool of patients randomly assigned to control/treatment groups --- to see if our initial results were reproducible. If (2) were true, the mean differences noted above would provide evidence of a heterogeneous effect and support the conclusion that ZMapp is especially likely to reduce mens' temperatures as compared to womens' temperatures (given the larger difference observed between control/treatment mean temperatures). If (3) were true --- which, again, seems most likely given the different mean day 14 temperatures for males and females --- the mean differences noted above wouldn't necessarily prove that the heterogeneous treatment effect is because the ZMapp drug is more effective for males than females; instead, it could point to the fact that ZMapp is most effective when administered to *patients in general* who have fevers and less effective when administered to *patients in general* who don't have fevers.
+
+## Collaborating with others, Part (1)
+Suppose you speak with a colleague to learn about heterogeneous treatment effects. 
+
+This colleague has access to a non-anonymized version of the same dataset and reports that they looked at heterogeneous effects of the ZMapp treatment by each of 80 different covariates to examine whether each predicted the effectiveness of ZMapp on each of 20 different indicators of health. 
+
+Across these regressions your colleague ran, the treatment's interaction with sex on the outcome of temperature is the only heterogeneous treatment effect that he found to be statistically significant. They reason that this shows the importance of sex for understanding the effectiveness of the drug, because nothing else seemed to indicate why it worked. Bolstering your colleague's confidence, after looking at the data, they also returned to their medical textbooks see the whispers of a theory about why ZMapp interacts with processes only present in men to cure. 
+
+Another doctor, unfamiliar with the data, hears your colleague's theory and finds it plausible. How likely do you think it is ZMapp works especially well for curing Ebola in men, and why? (This question is conceptual can be answered without performing any computation.)
+
+**Answer:** On the one hand, the combination of my colleague's post-hoc test results, *and* the results of the data from the actual experiment/RCT performed above, *and* the acknowledgement of plausibility from a doctor with (presumably) strong domain expertise lends credibility to the hypothesis that ZMapp works especially well for curing Ebola in men. Typically, when data and domain knowledge agree, that's a good indicator of a plausible result. However, that's not always the case. It's possible that we could have seen a significant result in the RCT simply due to chance. In fact, with so many tests/checks run by my colleague (i.e., 80 covariates on 20 indicators of health!!!), there's pretty much a statistical guarantee that we'll happen upon *some* test/*some* relationship that's significant, given that we typically consider one-in-every-twenty outcomes (5%) to be significant. This is a situation where we'd need to caution our colleague against p-hacking or engaging in a "fishing expedition" where they're either (A) only reporting the one finding out of many that happened to show significance, or (B) not making a correction to their reported p-values to account for the multiple comparisons they're investigating (i.e., by tightening the threshold for what constitutes a significant difference). I'd invite my colleague to tell me more about how we're avoiding the pitfall of (A) and would also encourage them to consider implementing a p-value correction (like Bonferroni) to their results *or* reproducing the experimental results with a follow-up RCT to avoid the pitfall of (B), before confidently concluding that we do, in fact, see good empirical evidence that ZMapp works especially well for curing Ebola in men.
+
+## Collaborating with others, Part (2)
+Suppose that your colleague conducted their research looking at the interaction of 80 covariates with ZMapp, but that you on your own tested this and only this HTE, and discovered a positive result. How, if at all, does your colleague's behavior change the interpretation of your test? Does this seem fair or reasonable?
+
+**Answer:** In this scenario, my cautionary remarks on the conclusion that ZMapp works especially well for men would be the same as above. It doesn't ultimately matter if it was my colleague or me who happened upon the "winning" (significant) HTE; if we're analyzing this data and doing the research together, we'd both need to reckon with --- and safeguard against --- potential pitfalls with the multiple comparisons problem (specifically p-hacking and "fishing expeditions"). Simply put, my colleague's behavior *should* change the interpretation of my own test and make me more hesitant/skeptical to accept this HTE as an indisputable significant result. I'd say this is both fair and reasonable. We're in the pursuit of truth with scientific experimentation, and we shouldn't allow our own preconceived notions or desires for "exciting" results to color our final conclusions, or we may lead interpreters of our work astray. With medical trials, being fast-and-loose with design, methodology, or statistical analysis considerations can be especially dangerous, so I would want to err on the side of caution here and work with my colleague to interpret the results of our study carefully and/or attempt to replicate them --- if we really believe them --- in a second study. 
+
+
+## Collaborating with others, Part (3)
+Now, imagine that your colleague had not conducted the 80 different regressions. Instead, they tested this heterogeneous treatment effect, and only this heterogeneous treatment effect, of their own accord. Would you be more or less inclined to believe that the heterogeneous treatment effect really exists? Why? Is there a general principle that is guiding your reasoning?
+
+**Answer:** In this scenario, I would be *more inclined* to believe that this HTE really exists. As a general rule, it should be relatively challenging to achieve statistical significance simply due to chance; typically, that'll happen only one out of twenty times. While it's possible that we could have simply stumbled upon a significant HTE here (for instance, perhaps this outcome represents the one-in-twenty time that we encounter significance by chance alone), it's objectively more likely that this significant outcome is real, or at least worth investigating further, *especially* if we were engaging in honest scientific research and specified the HTE as a core hypothesis of our study up-front. We could do this closer inspection and investigation by reproducing the study and seeing if the same result turns up. We could also share our findings with statistics professionals or other researchers as part of a peer-review --- and/or with others like the doctor described earlier who have substantial expertise in the domain of interest (e.g., Ebola treatments) --- to check for any evidence/explanations to the contrary of what the discovered HTE suggests. If the effect we observed were to hold up under scrutiny and rigorous review, I think we could feel reasonably confident in our outcome. After all, what even is the *full set* of plausible covariates and regression specifications that could be examined/tested for any experimental problem? Is that set even bounded? Can it really be quantified? And should we actually endeavor to test every member of that set, *every possible variable*, within every experiment to try to determine if the one significant HTE we report may have been significant simply due to chance? I think that would be largely unfeasible. Instead, we can follow some of the general practices above to lend credibility to our claims of significant findings. "Mistakes" or "unlucky accidents" can still happen when reporting significant HTEs --- just as David Reiley admitted with his own research described in "The Multiple-Comparisons Problem" 7.21 async lecture --- but that shouldn't stop well-executed, well-structured, well-thought out research from being published. We wouldn't want to make the threshold for statistical significance or for publishing so high that it's practically unattainable, or the pursuit of truth through science such that we're paralyzed by endless doubts and what-ifs.
