@@ -44,6 +44,9 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Built linear regressions of increasing complexity, and summarized findings/limitations in a scientific paper.
 - Highlighted skills and tools: Qualtrics (survey and data collection), R (analysis/modeling), linear regressions, power analysis with randomization inference, Extreme Value Bounds (EVB) and attrition analysis, R Markdown (paper writing).
 
+:microscope: **Field Experiments and Causal Inference**
+- Description and updates in progress...
+
 :page_with_curl: **Unmasking the Limitations of a Recent COVID-19 Study and Evaluating Causal Claims**
 - Responded to a study on COVID-19 school masking, evaluating the assumptions behind the study's claims.
 - Summarized study's conclusions and offered an argument against causality based on the chosen design.
