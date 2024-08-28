@@ -45,7 +45,7 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Highlighted skills and tools: Qualtrics (survey and data collection), R (analysis/modeling), linear regression, power analysis with randomization inference, Extreme Value Bounds (EVB) and attrition analysis, R Markdown (paper writing).
 
 :microscope: **Field Experiments and Causal Inference**
-- Answered a series of questions around treatment measurement, experimental design, compliance, and attrition.
+- Answered a series of questions around treatment effects, experimental design, compliance, and attrition.
 - Demonstrated ways to approach problems using the potential outcomes causal inference framework.
 - Reasoned through conceptual and quantitative mini case studies using data, analysis, and regressions.
 - Highlighted skills and tools: R (analysis/EDA), R Markdown (answer writing and formatting), hypothesis testing (t-test), randomization inference, linear regressions, power analysis, logic and reasoning, critical thinking, understanding of experimental design.
