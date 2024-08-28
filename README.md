@@ -42,10 +42,13 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Designed and conducted a within-subjects 2x2x4 factorial experiment with significant treatment effects.
 - Completed a literature review, outlined a hypothesis, and conducted a power analysis to inform sample size.
 - Built linear regressions of increasing complexity, and summarized findings/limitations in a scientific paper.
-- Highlighted skills and tools: Qualtrics (survey and data collection), R (analysis/modeling), linear regressions, power analysis with randomization inference, Extreme Value Bounds (EVB) and attrition analysis, R Markdown (paper writing).
+- Highlighted skills and tools: Qualtrics (survey and data collection), R (analysis/modeling), linear regression, power analysis with randomization inference, Extreme Value Bounds (EVB) and attrition analysis, R Markdown (paper writing).
 
 :microscope: **Field Experiments and Causal Inference**
-- Description and updates in progress...
+– Answered a series of questions around treatment measurement, experimental design, compliance, and attrition.
+– Demonstrated ways to approach problems using the potential outcomes causal inference framework.
+– Reasoned through conceptual and quantitative mini case studies using data, analysis, and regressions.
+- Highlighted skills and tools: R (analysis/EDA), R Markdown (answer writing and formatting), hypothesis testing (t-test), randomization inference, linear regressions, power analysis, logic and reasoning, critical thinking, understanding of experimental design.
 
 :page_with_curl: **Unmasking the Limitations of a Recent COVID-19 Study and Evaluating Causal Claims**
 - Responded to a study on COVID-19 school masking, evaluating the assumptions behind the study's claims.
@@ -75,7 +78,7 @@ Project materials reside in `individual folders`, labeled by project name. Below
 - Fitted three linear models to predict interest rates for a specific segment of consumer microloans.
 - Identified statistical and practical significance for several predictors, and summarized results in a paper.
 - Presented important considerations around model interpretability, bias, and business/customer trade-offs.
-- Highlighted skills and tools: R (analysis/modeling), statistical goodness of fit testing, linear regressions, R Markdown (paper writing).
+- Highlighted skills and tools: R (analysis/modeling), statistical goodness of fit testing, linear regression, R Markdown (paper writing).
 
 :us: **Measuring Voting Difficulty in the 2020 U.S. Presidential Election**
 - Analyzed voting challenges experienced by Democratic (D) and Republican (R) voters based on ANES data. 
